@@ -1,6 +1,7 @@
 ﻿@page "/allocate"
 <h3>Allocate</h3>
 
+<p>Test Kubernetes Api: <button @onclick="() => TestKubernetesApiAsync()">Submit</button> </p>
 <p>Allocate Request: <button @onclick="() => AllocateAsync()">Submit</button> </p>
 <p>Manual Allocate: <input type="text" @bind="Host" /><input type="number" @bind="Port" /><button @onclick="() => ManualAllocateAsync()">Submit</button> </p>
 <p>Admin Ops: <button @onclick="() => ClearAsync()">Clear</button> <button @onclick="() => ListAsync()">List</button></p>

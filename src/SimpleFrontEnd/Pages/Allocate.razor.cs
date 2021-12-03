@@ -7,7 +7,7 @@ namespace SimpleFrontEnd.Pages;
 public partial class Allocate : ComponentBase
 {
     [Inject]
-    public AgonesAllocationSet AgonesAllocationList { get; set; } = default!;
+    public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
     [Inject]
     public IHttpClientFactory HttpClientFactory { get; set; } = default!;
 
@@ -16,26 +16,37 @@ public partial class Allocate : ComponentBase
     public string Host { get; set; } = "";
     public int Port { get; set; } = 0;
 
+    private async Task TestKubernetesApiAsync()
+    {
+        if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
+        {
+            Result = "Frontend is not running Kubernetes. You cannot execute allocate.";
+            List = AgonesAllocationService.GetAllAllocationEntries();
+        }
+        else
+        {
+            var result = await AgonesAllocationService.GetKubernetesApiAsync();
+            Result = result;
+            List = AgonesAllocationService.GetAllAllocationEntries();
+        }
+
+        StateHasChanged();
+
+    }
+
     private async Task AllocateAsync()
     {
         if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
         {
             Result = "Frontend is not running Kubernetse. You cannot execute allocate.";
-            List = Array.Empty<string>();
+            List = AgonesAllocationService.GetAllAllocationEntries();
         }
         else
         {
-            var endpoint = KubernetesServiceProvider.Current.KubernetesServiceEndPoint;
-            var accessToken = KubernetesServiceProvider.Current.AccessToken;
-
             // todo: Allocation を Post する。
-            var httpClient = HttpClientFactory.CreateClient("kubernetes-api");
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{endpoint}/api");
-            request.Headers.TryAddWithoutValidation("Accept", "application/json");
-            request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {accessToken}");
-            var result = await httpClient.SendAsync(request);
-            Result = await result.Content.ReadAsStringAsync();
-            List = AgonesAllocationList.GetAll();
+            var result = await AgonesAllocationService.GetKubernetesApiAsync();
+            Result = result;
+            List = AgonesAllocationService.GetAllAllocationEntries();
         }
 
         StateHasChanged();
@@ -43,24 +54,24 @@ public partial class Allocate : ComponentBase
 
     private Task ManualAllocateAsync()
     {
-        AgonesAllocationList.Add(new AgonesAllocation
+        AgonesAllocationService.AddAllocationEntry(new AgonesAllocation
         {
             Host = Host,
             Port = Port,
         });
-        Result = AgonesAllocationList.GetAddressRandomOrDefault();
-        List = AgonesAllocationList.GetAll();
+        Result = $"http://{Host}:{Port}";
+        List = AgonesAllocationService.GetAllAllocationEntries();
 
         StateHasChanged();
-
         return Task.CompletedTask;
     }
 
     private Task ClearAsync()
     {
-        AgonesAllocationList.Clear();
+        AgonesAllocationService.ClearAllocationEntries();
         Result = null;
         List = Array.Empty<string>();
+
         StateHasChanged();
         return Task.CompletedTask;
     }
@@ -68,7 +79,8 @@ public partial class Allocate : ComponentBase
     private Task ListAsync()
     {
         Result = null;
-        List = AgonesAllocationList.GetAll();
+        List = AgonesAllocationService.GetAllAllocationEntries();
+
         StateHasChanged();
         return Task.CompletedTask;
     }

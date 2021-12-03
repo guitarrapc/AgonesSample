@@ -10,12 +10,13 @@ namespace SimpleFrontEnd.Pages;
 public partial class Connect : ComponentBase, IRandomHubReciever, IDisposable
 {
     [Inject]
-    public AgonesAllocationSet AgonesAllocationList { get; set; } = default!;
+    public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
 
     private ImmutableList<string> _log = ImmutableList<string>.Empty;
     private GrpcChannel? _channel;
     private IRandomHub? _hubClient;
     private bool _connected;
+    private string? _address;
     private string? _host;
     private string? _id;
 
@@ -23,13 +24,14 @@ public partial class Connect : ComponentBase, IRandomHubReciever, IDisposable
     {
         if (!firstRender) return;
 
-        var address = AgonesAllocationList.GetAddressRandomOrDefault();
+        var address = AgonesAllocationService.GetAllocationEntryRandomOrDefault();
         if (address is null)
             return;
 
         _channel = GrpcChannel.ForAddress(address);
         _hubClient = await StreamingHubClient.ConnectAsync<IRandomHub, IRandomHubReciever>(_channel, this);
         var result = await _hubClient.StartAsync();
+        _address = address;
         _host = result.Host;
         _id = result.Id;
 

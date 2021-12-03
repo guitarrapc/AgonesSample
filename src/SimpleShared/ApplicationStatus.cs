@@ -13,11 +13,11 @@ public class KubernetesServiceProvider
     public bool IsRunningOnKubernetes
         => _isRunningOnKubernetes ?? (bool)(_isRunningOnKubernetes = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST")));
     public string AccessToken
-        => _accessToken ??= File.ReadAllText("/var/run/secrets/kubernetes.io/serviceaccount/token");
+        => _accessToken ??= IsRunningOnKubernetes ? File.ReadAllText("/var/run/secrets/kubernetes.io/serviceaccount/token") : "";
     public string HostName
         => _hostName ??= Environment.GetEnvironmentVariable("HOSTNAME")!;
     public string KubernetesServiceEndPoint
         => _kubernetesServiceEndPoint ??= $"https://{Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST")}:{Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_PORT")}";
     public string Namespace
-        => _namespace ??= File.ReadAllText("/var/run/secrets/kubernetes.io/serviceaccount/namespace");
+        => _namespace ??= IsRunningOnKubernetes ? File.ReadAllText("/var/run/secrets/kubernetes.io/serviceaccount/namespace") : "";
 }
