@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-frontend
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: simple-frontend
+  template:
+    metadata:
+      labels:
+        app: simple-frontend
+    spec:
+      containers:
+        - name: simple-frontend
+          image: guitarrapc/agonessample-simplefrontend:0.5
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - name: default
+              containerPort: 80
+              protocol: TCP
+---
+apiVersion: "agones.dev/v1"
+kind: Fleet
+metadata:
+  name: simple-server
+  namespace: default
+spec:
+  replicas: 2
+  template:
+    spec:
+      ports:
+        - name: default
+          containerPort: 80
+          protocol: TCP
+      template:
+        spec:
+          containers:
+            - name: simple-server
+              image: guitarrapc/agonessample-simpleserver:0.5
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "50m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "500m"
+---
+apiVersion: "autoscaling.agones.dev/v1"
+kind: FleetAutoscaler
+metadata:
+  name: simple-server-autoscaler
+  namespace: default
+spec:
+  fleetName: simple-server
+  policy:
+    type: Buffer
+    buffer:
+      bufferSize: 2
+      minReplicas: 0
+      maxReplicas: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-frontend
+  namespace: default
+spec:
+  selector:
+    app: simple-frontend
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: default

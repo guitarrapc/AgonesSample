@@ -1,0 +1,16 @@
+services:
+  frontend:
+    build:
+      dockerfile: ./src/SimpleFrontEnd/Dockerfile
+      context: .
+    image: agonessample-simplefrontend:dev
+    ports:
+      - 5005:80
+
+  server:
+    build:
+      dockerfile: ./src/SimpleServer/Dockerfile
+      context: .
+    image: agonessample-simpleserver:dev
+    ports:
+      - 5006:80
