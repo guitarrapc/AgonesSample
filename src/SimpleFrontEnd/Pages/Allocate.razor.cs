@@ -18,19 +18,10 @@ public partial class Allocate : ComponentBase
 
     private async Task AllocateAsync()
     {
-        if (Host is not null)
-        {
-            AgonesAllocationList.Add(new AgonesAllocation
-            {
-                Host = Host,
-                Port = Port,
-            });
-            Result = AgonesAllocationList.GetAddressRandomOrDefault();
-            List = AgonesAllocationList.GetAll();
-        }
-        else if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
+        if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
         {
             Result = "Frontend is not running Kubernetse. You cannot execute allocate.";
+            List = Array.Empty<string>();
         }
         else
         {
@@ -38,7 +29,7 @@ public partial class Allocate : ComponentBase
             var accessToken = KubernetesServiceProvider.Current.AccessToken;
 
             // todo: Allocation を Post する。
-            var httpClient = HttpClientFactory.CreateClient("kubernetes");
+            var httpClient = HttpClientFactory.CreateClient("kubernetes-api");
             var request = new HttpRequestMessage(HttpMethod.Get, $"{endpoint}/api");
             request.Headers.TryAddWithoutValidation("Accept", "application/json");
             request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {accessToken}");
@@ -48,6 +39,21 @@ public partial class Allocate : ComponentBase
         }
 
         StateHasChanged();
+    }
+
+    private Task ManualAllocateAsync()
+    {
+        AgonesAllocationList.Add(new AgonesAllocation
+        {
+            Host = Host,
+            Port = Port,
+        });
+        Result = AgonesAllocationList.GetAddressRandomOrDefault();
+        List = AgonesAllocationList.GetAll();
+
+        StateHasChanged();
+
+        return Task.CompletedTask;
     }
 
     private Task ClearAsync()

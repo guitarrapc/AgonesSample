@@ -12,6 +12,7 @@ spec:
       labels:
         app: simple-frontend
     spec:
+      serviceAccountName: agones-rest
       containers:
         - name: simple-frontend
           image: guitarrapc/agonessample-simplefrontend:0.5
@@ -78,3 +79,51 @@ spec:
   ports:
     - port: 80
       targetPort: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agones-rest
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: agones-rest
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+  - apiGroups:
+      - agones.dev
+    resources:
+      - gameservers
+    verbs:
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - allocation.agones.dev
+    resources:
+      - gameserverallocations
+    verbs:
+      - list
+      - update
+      - watch
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: agones-rest
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: agones-rest
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: agones-rest
+  apiGroup: rbac.authorization.k8s.io

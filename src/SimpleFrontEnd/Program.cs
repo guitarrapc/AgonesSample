@@ -5,17 +5,17 @@ using Microsoft.AspNetCore.Components.Web;
 using SimpleFrontEnd.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-using var httpClientHandler = new HttpClientHandler()
-{
-    ServerCertificateCustomValidationCallback = (HttpRequestMessage requestMessage, X509Certificate2? certificate, X509Chain? chain, SslPolicyErrors sslErrors) => false,
-};
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<AgonesAllocationSet>();
-builder.Services.AddHttpClient("Kubernetes").ConfigurePrimaryHttpMessageHandler(() => httpClientHandler);
+builder.Services.AddHttpClient("kubernetes-api")
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
+    });
 
 var app = builder.Build();
 
