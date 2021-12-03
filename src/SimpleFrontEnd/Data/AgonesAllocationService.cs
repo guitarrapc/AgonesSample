@@ -1,21 +1,25 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
 using SimpleShared;
 
 namespace SimpleFrontEnd.Data;
 
 public class AgonesAllocationService
 {
+    private readonly ILogger<AgonesAllocationService> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly AgonesAllocationSet _allocationSet;
     private readonly string _endpoint;
     private readonly string _accessToken;
     private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
     {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         WriteIndented = true,
     };
 
-    public AgonesAllocationService(IHttpClientFactory httpClientFactory)
+    public AgonesAllocationService(IHttpClientFactory httpClientFactory, ILogger<AgonesAllocationService> logger)
     {
+        _logger = logger;
         _httpClientFactory = httpClientFactory;
         _allocationSet = new AgonesAllocationSet();
         _endpoint = KubernetesServiceProvider.Current.KubernetesServiceEndPoint;
@@ -23,46 +27,88 @@ public class AgonesAllocationService
     }
 
     /// <summary>
-    /// Kubernetes の /api エンドポイントに Get します。
+    /// Send Get request to Kubernetes /api endpoint.
     /// </summary>
     /// <returns></returns>
     public Task<string> GetKubernetesApiAsync() => SendKubernetesApiAsync("/api", HttpMethod.Get);
 
     /// <summary>
-    /// Kubernetes API を実行します。
+    /// Send Allocation request to Agones.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<string> SendAllocationAsync(string @namespace, string fleetName)
+    {
+        var body = GameServerAllocationRequest.CreateRequest("allocation", fleetName);
+        var json = JsonSerializer.Serialize(body);
+        // Console.WriteLine(json);
+
+        var content = new StringContent(json);
+        var response = await SendKubernetesApiAsync<GameServerAllocationResponse>($"/apis/allocation.agones.dev/v1/namespaces/{@namespace}/gameserverallocations", HttpMethod.Post, content);
+
+        var host = response.status!.address;
+        var port = response.status!.ports.First().port;
+        AddAllocationEntry(new AgonesAllocation
+        {
+            Host = host,
+            Port = port,
+        });
+        return $"http://{host}:{port}";
+    }
+
+
+    /// <summary>
+    /// Send Request to Kubernetes API and get T result.
     /// </summary>
     /// <param name="path"></param>
     /// <param name="method"></param>
     /// <returns></returns>
-    private async Task<T?> SendKubernetesApiAsync<T>(string path, HttpMethod method)
+    private async Task<T> SendKubernetesApiAsync<T>(string path, HttpMethod method, HttpContent? content = null)
     {
         var httpClient = _httpClientFactory.CreateClient("kubernetes-api");
         var request = new HttpRequestMessage(method, $"{_endpoint}{path}");
         request.Headers.TryAddWithoutValidation("Accept", "application/json");
         request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {_accessToken}");
+        if (content is not null)
+        {
+            // agones can not accept content-type with media-type. 
+            // re-apply request content-type to remove `media-type: utf8` from contet-type.
+            // see: https://github.com/googleforgames/agones/blob/0e244fddf938e88dc5156ac2c7339adbb230daee/vendor/k8s.io/apimachinery/pkg/runtime/codec.go#L218-L220
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            request.Content = content;
+        }
         var result = await httpClient.SendAsync(request);
         result.EnsureSuccessStatusCode();
+        var json = await result.Content.ReadAsStringAsync();
+        // Console.WriteLine(json);
+
         var bytes = await result.Content.ReadAsByteArrayAsync();
         var obj = JsonSerializer.Deserialize<T>(bytes, _serializerOptions);
-        return obj;
+        return obj!;
     }
 
     /// <summary>
-    /// Kubernetes API を実行します。
+    /// Send Request to Kubernetes API and get string result.
     /// </summary>
     /// <param name="path"></param>
     /// <param name="method"></param>
     /// <returns></returns>
-    private async Task<string> SendKubernetesApiAsync(string path, HttpMethod method)
+    private async Task<string> SendKubernetesApiAsync(string path, HttpMethod method, HttpContent? content = null)
     {
         var httpClient = _httpClientFactory.CreateClient("kubernetes-api");
         var request = new HttpRequestMessage(method, $"{_endpoint}{path}");
         request.Headers.TryAddWithoutValidation("Accept", "application/json");
         request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {_accessToken}");
+        if (content is not null)
+        {
+            // agones can not accept content-type with media-type. 
+            // re-apply request content-type to remove `media-type: utf8` from contet-type.
+            // see: https://github.com/googleforgames/agones/blob/0e244fddf938e88dc5156ac2c7339adbb230daee/vendor/k8s.io/apimachinery/pkg/runtime/codec.go#L218-L220
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            request.Content = content;
+        }
         var result = await httpClient.SendAsync(request);
         result.EnsureSuccessStatusCode();
-        var bytes = await result.Content.ReadAsByteArrayAsync();
-        return JsonSerializer.Serialize(bytes, _serializerOptions);
+        return await result.Content.ReadAsStringAsync();
     }
 
     #region AllocationEntry

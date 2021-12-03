@@ -25,8 +25,8 @@ public partial class Allocate : ComponentBase
         }
         else
         {
-            var result = await AgonesAllocationService.GetKubernetesApiAsync();
-            Result = result;
+            var apiResult = await AgonesAllocationService.GetKubernetesApiAsync();
+            Result = apiResult;
             List = AgonesAllocationService.GetAllAllocationEntries();
         }
 
@@ -43,9 +43,8 @@ public partial class Allocate : ComponentBase
         }
         else
         {
-            // todo: Allocation を Post する。
-            var result = await AgonesAllocationService.GetKubernetesApiAsync();
-            Result = result;
+            var host = await AgonesAllocationService.SendAllocationAsync("default", "simple-server");
+            Result = host;
             List = AgonesAllocationService.GetAllAllocationEntries();
         }
 

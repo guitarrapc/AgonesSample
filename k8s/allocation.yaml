@@ -1,0 +1,15 @@
+# kubectl apply -f ./k8s/allocation.yaml
+apiVersion: "allocation.agones.dev/v1"
+kind: GameServerAllocation
+spec:
+  selectors:
+    - matchLabels:
+        agones.dev/fleet: simple-server
+      gameServerState: Ready
+  scheduling: Packed
+metadata:
+  name: "allocation"
+  labels:
+    mode: server
+  annotations:
+    foo: bar
