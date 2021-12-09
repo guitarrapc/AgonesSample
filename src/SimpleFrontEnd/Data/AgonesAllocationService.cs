@@ -8,7 +8,7 @@ public class AgonesAllocationService
 {
     private readonly ILogger<AgonesAllocationService> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly AgonesAllocationSet _allocationSet;
+    private readonly IAgonesAllocationDatabase _database;
     private readonly string _endpoint;
     private readonly string _accessToken;
     private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
@@ -17,11 +17,11 @@ public class AgonesAllocationService
         WriteIndented = true,
     };
 
-    public AgonesAllocationService(IHttpClientFactory httpClientFactory, ILogger<AgonesAllocationService> logger)
+    public AgonesAllocationService(IAgonesAllocationDatabase database, IHttpClientFactory httpClientFactory, ILogger<AgonesAllocationService> logger)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
-        _allocationSet = new AgonesAllocationSet();
+        _database = database;
         _endpoint = KubernetesServiceProvider.Current.KubernetesServiceEndPoint;
         _accessToken = KubernetesServiceProvider.Current.AccessToken;
     }
@@ -113,9 +113,11 @@ public class AgonesAllocationService
 
     #region AllocationEntry
 
-    public void AddAllocationEntry(string item) => _allocationSet.Add(item);
-    public void AddAllocationEntry(AgonesAllocation item) => _allocationSet.Add($"{item.Host}:{item.Port}");
-    public void ClearAllocationEntries() => _allocationSet.Clear();
+    public void AddAllocationEntry(string item) => _database.Add(item);
+    public void AddAllocationEntry(AgonesAllocation item) => _database.Add($"{item.Host}:{item.Port}");
+    public void RemoveAllocationEntry(string item) => _database.Remove(item);
+    public void RemoveAllocationEntry(AgonesAllocation item) => _database.Remove($"{item.Host}:{item.Port}");
+    public void ClearAllocationEntries() => _database.Clear();
 
     /// <summary>
     /// Get Address Random or nothing.
@@ -123,10 +125,10 @@ public class AgonesAllocationService
     /// <returns></returns>
     public string[] GetAllAllocationEntries()
     {
-        if (_allocationSet.Count == 0)
+        if (_database.Count == 0)
             return Array.Empty<string>();
 
-        return _allocationSet.Items.Select(x => $"http://{x}").ToArray();
+        return _database.Items.Select(x => $"http://{x}").ToArray();
     }
     /// <summary>
     /// Get Address Random or nothing.
@@ -134,11 +136,11 @@ public class AgonesAllocationService
     /// <returns></returns>
     public string? GetAllocationEntryRandomOrDefault()
     {
-        if (_allocationSet.Count == 0)
+        if (_database.Count == 0)
             return null;
 
-        var skip = Random.Shared.Next(0, _allocationSet.Count);
-        var item = _allocationSet.Items.Skip(skip).First();
+        var skip = Random.Shared.Next(0, _database.Count);
+        var item = _database.Items.Skip(skip).First();
         return $"http://{item}";
     }
     #endregion

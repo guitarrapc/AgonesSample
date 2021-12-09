@@ -1,6 +1,6 @@
 ﻿namespace SimpleFrontEnd.Data;
 
-public class AgonesAllocationSet
+public class InmemoryAgonesAllocationDatabase : IAgonesAllocationDatabase
 {
     public IReadOnlySet<string> Items => _items;
     private readonly SortedSet<string> _items = new();

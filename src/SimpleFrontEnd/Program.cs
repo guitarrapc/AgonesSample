@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddSingleton<IAgonesAllocationDatabase, InmemoryAgonesAllocationDatabase>();
 builder.Services.AddSingleton<AgonesAllocationService>();
 builder.Services.AddHttpClient("kubernetes-api")
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()

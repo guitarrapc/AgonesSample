@@ -1,0 +1,9 @@
+﻿@page "/agones"
+<h3>Shutdown</h3>
+
+<p>Server address:port<input type="text" @bind="Input" /></p>
+<p>Allocate<button @onclick="() => AllocateAsync()">Submit</button> </p>
+<p>Ready<button @onclick="() => ReadyAsync()">Submit</button> </p>
+<p>Shutdown<button @onclick="() => ShutdownAsync()">Submit</button> </p>
+<p>Address: @_address</p>
+<p>Result: @Result</p>

@@ -15,7 +15,7 @@ spec:
       serviceAccountName: agones-rest
       containers:
         - name: simple-frontend
-          image: guitarrapc/agonessample-simplefrontend:0.5
+          image: guitarrapc/agonessample-simplefrontend:0.6
           imagePullPolicy: Always
           resources:
             limits:
@@ -43,7 +43,7 @@ spec:
         spec:
           containers:
             - name: simple-server
-              image: guitarrapc/agonessample-simpleserver:0.5
+              image: guitarrapc/agonessample-simpleserver:0.6
               imagePullPolicy: Always
               resources:
                 requests:
