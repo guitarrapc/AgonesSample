@@ -11,7 +11,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<IAgonesAllocationDatabase, InmemoryAgonesAllocationDatabase>();
+builder.Services.AddSingleton<KubernetesApiService>(); 
 builder.Services.AddSingleton<AgonesAllocationService>();
+builder.Services.AddSingleton<AgonesGameServerService>();
 builder.Services.AddHttpClient("kubernetes-api")
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
     {
