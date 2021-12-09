@@ -12,10 +12,11 @@ public class AgonesHostedService : IHostedService
         _healthKeeper = healthKeeper;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         // keep running health check loop.
         _taskLoop = _healthKeeper.ExecuteAsync();
+        return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
