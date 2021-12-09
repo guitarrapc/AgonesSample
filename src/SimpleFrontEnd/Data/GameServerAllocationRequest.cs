@@ -86,16 +86,16 @@ public class GameServerAllocationResponse : GameServerAllocationBase
     public Status? status { get; set; }
     public class Status
     {
-        public string state { get; set; }
-        public string gameServerName { get; set; }
-        public Port[] ports { get; set; }
-        public string address { get; set; }
-        public string nodeName { get; set; }
+        public string? state { get; set; }
+        public string? gameServerName { get; set; }
+        public Port[]? ports { get; set; }
+        public string? address { get; set; }
+        public string? nodeName { get; set; }
     }
 
     public class Port
     {
-        public string name { get; set; }
+        public string? name { get; set; }
         public int port { get; set; }
     }
 }
