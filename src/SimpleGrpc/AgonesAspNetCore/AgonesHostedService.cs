@@ -1,6 +1,6 @@
 ﻿using Agones;
 
-namespace SimpleServer.AgonesAspNetCore;
+namespace SimpleGrpc.AgonesAspNetCore;
 
 public class AgonesHostedService : IHostedService
 {

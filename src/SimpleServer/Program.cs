@@ -1,22 +1,16 @@
-﻿using SimpleServer.AgonesAspNetCore;
-using SimpleServer.Services;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Additional configuration is required to successfully run gRPC on macOS.
-// For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
-
-// Add services to the container.
-builder.Services.AddGrpc();
-builder.Services.AddMagicOnion();
-builder.Services.AddAgonesSdk();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.MapGrpcService<GreeterService>();
-app.MapMagicOnionService();
-
-app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
-
-app.Run();
+﻿if (args is { Length: > 0 })
+{
+    var serverTask = args[0].ToLowerInvariant() switch
+    {
+        "api" => SimpleApi.Program.RunApp(Array.Empty<string>()),
+        "grpc" => SimpleGrpc.Program.RunApp(Array.Empty<string>()),
+        _ => throw new InvalidOperationException($"{args[0]} is unknown target.")
+    };
+    await serverTask;
+}
+else
+{
+    var serverGrpcTask = SimpleGrpc.Program.RunApp(Array.Empty<string>());
+    var serverApiTask = SimpleApi.Program.RunApp(Array.Empty<string>());
+    await Task.WhenAll(serverGrpcTask, serverApiTask);
+}

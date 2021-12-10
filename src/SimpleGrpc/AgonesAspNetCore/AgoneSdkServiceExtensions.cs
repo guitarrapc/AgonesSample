@@ -1,7 +1,7 @@
 ﻿using Agones;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace SimpleServer.AgonesAspNetCore;
+namespace SimpleGrpc.AgonesAspNetCore;
 
 public static class AgoneSdkServiceExtensions
 {

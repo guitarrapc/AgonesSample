@@ -4,25 +4,17 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>23363b8e-4f15-4bad-aa6e-6d94727fdda4</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="AgonesSDK" Version="1.19.0" />
-    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0" />
-    <PackageReference Include="Grpc.Core" Version="2.42.0" />
-    <PackageReference Include="MagicOnion.Server" Version="4.3.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SimpleShared\SimpleShared.csproj" />
+    <ProjectReference Include="..\SimpleApi\SimpleApi.csproj" />
+    <ProjectReference Include="..\SimpleGrpc\SimpleGrpc.csproj" />
   </ItemGroup>
 
 </Project>

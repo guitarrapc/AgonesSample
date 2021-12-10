@@ -1,4 +1,4 @@
-﻿namespace SimpleServer.AgonesAspNetCore;
+﻿namespace SimpleGrpc.AgonesAspNetCore;
 
 /// <summary>
 /// Agones GameServer State.

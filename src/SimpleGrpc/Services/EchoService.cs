@@ -2,7 +2,7 @@
 using MagicOnion.Server;
 using SimpleShared;
 
-namespace SimpleServer.Services;
+namespace SimpleGrpc.Services;
 public class EchoService : ServiceBase<IEchoService>, IEchoService
 {
     public UnaryResult<string> EchoAsync(string message)
