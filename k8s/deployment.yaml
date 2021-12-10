@@ -11,11 +11,13 @@ spec:
     metadata:
       labels:
         app: simple-frontend
+      annotations:
+        kubectl.kubernetes.io/default-container: simple-frontend
     spec:
       serviceAccountName: agones-rest
       containers:
         - name: simple-frontend
-          image: guitarrapc/agonessample-simplefrontend:0.6
+          image: guitarrapc/agonessample-simplefrontend:0.7
           imagePullPolicy: Always
           resources:
             limits:
@@ -34,16 +36,24 @@ metadata:
 spec:
   replicas: 2
   template:
+    metadata:
+      labels:
+        app: simple-server
     spec:
       ports:
         - name: default
-          containerPort: 80
+          containerPort: 5157
           protocol: TCP
       template:
+        metadata:
+          labels:
+            app: simple-server
+          annotations:
+            kubectl.kubernetes.io/default-container: simple-server
         spec:
           containers:
             - name: simple-server
-              image: guitarrapc/agonessample-simpleserver:0.6
+              image: guitarrapc/agonessample-simpleserver:0.7
               imagePullPolicy: Always
               resources:
                 requests:
@@ -52,6 +62,10 @@ spec:
                 limits:
                   memory: "128Mi"
                   cpu: "500m"
+              ports:
+                - name: api
+                  containerPort: 5012
+                  protocol: TCP
 ---
 apiVersion: "autoscaling.agones.dev/v1"
 kind: FleetAutoscaler
@@ -127,3 +141,15 @@ roleRef:
   kind: ClusterRole
   name: agones-rest
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-server
+  namespace: default
+spec:
+  selector:
+    app: simple-server
+  ports:
+    - port: 80
+      targetPort: 5012

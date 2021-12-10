@@ -3,7 +3,7 @@ using MagicOnion;
 using MagicOnion.Server;
 using SimpleShared;
 
-namespace SimpleServer.Services;
+namespace SimpleGrpc.Services;
 
 public class AgonesService : ServiceBase<IAgonesService>, IAgonesService
 {

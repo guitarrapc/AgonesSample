@@ -2,24 +2,21 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
-EXPOSE 5012
-EXPOSE 5017
+EXPOSE 5217
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["src/SimpleServer/SimpleServer.csproj", "src/SimpleServer/"]
-COPY ["src/SimpleApi/SimpleApi.csproj", "src/SimpleApi/"]
 COPY ["src/SimpleGrpc/SimpleGrpc.csproj", "src/SimpleGrpc/"]
 COPY ["src/SimpleShared/SimpleShared.csproj", "src/SimpleShared/"]
-RUN dotnet restore "src/SimpleServer/SimpleServer.csproj"
+RUN dotnet restore "src/SimpleGrpc/SimpleGrpc.csproj"
 COPY . .
-WORKDIR "/src/src/SimpleServer"
-RUN dotnet build "SimpleServer.csproj" -c Release -o /app/build
+WORKDIR "/src/src/SimpleGrpc"
+RUN dotnet build "SimpleGrpc.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "SimpleServer.csproj" -c Release -o /app/publish
+RUN dotnet publish "SimpleGrpc.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SimpleServer.dll"]
+ENTRYPOINT ["dotnet", "SimpleGrpc.dll"]

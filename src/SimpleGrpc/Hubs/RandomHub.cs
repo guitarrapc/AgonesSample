@@ -1,7 +1,7 @@
 ﻿using MagicOnion.Server.Hubs;
 using SimpleShared;
 
-namespace SimpleServer.Hubs;
+namespace SimpleGrpc.Hubs;
 
 public class RandomHub : StreamingHubBase<IRandomHub, IRandomHubReciever>, IRandomHub
 {

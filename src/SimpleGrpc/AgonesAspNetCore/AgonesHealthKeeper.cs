@@ -1,7 +1,7 @@
 ﻿using Agones;
 using SimpleShared;
 
-namespace SimpleServer.AgonesAspNetCore;
+namespace SimpleGrpc.AgonesAspNetCore;
 
 public class AgonesHealthKeeper : IDisposable
 {
