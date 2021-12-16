@@ -5,7 +5,7 @@ namespace SimpleGrpc.AgonesAspNetCore;
 public class AgonesHostedService : IHostedService
 {
     private readonly AgonesHealthKeeper _healthKeeper;
-    private Task? _taskLoop;
+    private Task? _task;
 
     public AgonesHostedService(AgonesHealthKeeper healthKeeper)
     {
@@ -15,15 +15,14 @@ public class AgonesHostedService : IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         // keep running health check loop.
-        _taskLoop = _healthKeeper.ExecuteAsync();
+        _task = _healthKeeper.ExecuteAsync();
         return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_taskLoop is not null)
-            await _taskLoop.ConfigureAwait(false);
-
-        _healthKeeper.Dispose();
+        await _healthKeeper.DisposeAsync();
+        if (_task is not null)
+            await _task.ConfigureAwait(false);
     }
 }

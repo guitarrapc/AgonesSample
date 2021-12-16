@@ -3,7 +3,7 @@ using SimpleShared;
 
 namespace SimpleGrpc.AgonesAspNetCore;
 
-public class AgonesHealthKeeper : IDisposable
+public class AgonesHealthKeeper : IAsyncDisposable
 {
     private readonly AgonesSDK _agonesSdk;
     private readonly AgonesOption _option;
@@ -99,7 +99,7 @@ public class AgonesHealthKeeper : IDisposable
         return Task.CompletedTask;
     }
 
-    public async void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _cts.Cancel();
         if (_taskLoop is not null)
