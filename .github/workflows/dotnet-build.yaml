@@ -1,0 +1,45 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  SLN_ROOT: .
+
+jobs:
+  dotnet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: build
+        run: dotnet build -c Release
+      # - name: test
+      #   run: dotnet test -c Release
+      - name: publish
+        run: dotnet public -c Release
+
+  docker:
+    strategy:
+      matrix:
+        project: ["SimpleServer", "SimpleFrontEnd"]
+        include:
+          - project: "SimpleServer"
+            docker-image: guitarrapc/agonessample-simpleserver
+          - project: "SimpleFrontEnd"
+            docker-image: guitarrapc/agonessample-simplefrontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - name: docker build
+        run: docker build -t ${{ matrix.docker-image }}:latest -f src/${{ matrix.project }}/Dockerfile .
