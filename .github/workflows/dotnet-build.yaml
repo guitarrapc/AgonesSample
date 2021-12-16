@@ -10,7 +10,6 @@ on:
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
-  SLN_ROOT: .
 
 jobs:
   dotnet:
@@ -26,7 +25,7 @@ jobs:
       # - name: test
       #   run: dotnet test -c Release
       - name: publish
-        run: dotnet public -c Release
+        run: dotnet publish -c Release
 
   docker:
     strategy:
