@@ -1,7 +1,7 @@
 # AgonesSample
 
-* [Server image on DockerHub](https://hub.docker.com/repository/docker/guitarrapc/agonessample-simpleserver) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleServer/Dockerfile)
-* [FrontEnd image on DockerHub](https://hub.docker.com/repository/docker/guitarrapc/agonessample-simplefrontend) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleFrontEnd/Dockerfile)
+* [guitarrapc/agonessample-simpleserver](https://hub.docker.com/r/guitarrapc/agonessample-simpleserver) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleServer/Dockerfile)
+* [guitarrapc/agonessample-simplefrontend](https://hub.docker.com/r/guitarrapc/agonessample-simplefrontend) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleFrontEnd/Dockerfile)
 
 # Prerequisites
 
@@ -44,12 +44,12 @@ services:
   frontend:
     image: agonessample-simplefrontend:v0.9.0
     ports:
-      - 5005:80
+      - 5104:80
 
   server:
-    image: agonessample-simplefrontend:v0.9.0
+    image: agonessample-simpleserver:v0.9.0
     ports:
-      - 5006:80
+      - 5157:80
 ```
 
 Then run docker-compose.
