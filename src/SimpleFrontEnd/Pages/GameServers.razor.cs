@@ -13,8 +13,6 @@ public partial class GameServers : ComponentBase
 
     public string? Result { get; set; }
     public GameServerViewModel[] List { get; set; } = Array.Empty<GameServerViewModel>();
-    public string Host { get; set; } = "";
-    public int Port { get; set; } = 0;
 
     private async Task GetGameServersAsync()
     {
@@ -28,13 +26,13 @@ public partial class GameServers : ComponentBase
             try
             {
                 var gameservers = await AgonesGameServerService.GetGameServersAsync("default");
-                Result = $"{gameservers!.items.Length} GameServers found.";
-                List = gameservers.items.Select(x => new GameServerViewModel
+                Result = $"{gameservers?.items?.Length ?? 0} GameServers found.";
+                List = gameservers?.items == null ? Array.Empty<GameServerViewModel>() : gameservers!.items.Select(x => new GameServerViewModel
                 {
                     Address = x.status!.address,
-                    Port = x.status!.ports![0].port,
+                    Port = x.status.ports![0].port,
                     // 2021-12-09T06:35:40Z
-                    Age = ConvertToAge(DateTime.UtcNow - x.metadata.creationTimestamp),
+                    Age = ConvertToAge(DateTime.UtcNow - x.metadata!.creationTimestamp),
                     Name = x.metadata.name,
                     Namespace = x.metadata.@namespace,
                     Node = x.status.nodeName,
