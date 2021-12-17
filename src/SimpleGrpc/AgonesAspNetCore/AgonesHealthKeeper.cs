@@ -74,7 +74,6 @@ public class AgonesHealthKeeper : IAsyncDisposable
                 catch (Grpc.Core.RpcException ex)
                 {
                     _logger.LogError(ex.Message, ex);
-                    throw;
                 }
 
                 await _timer.WaitForNextTickAsync().ConfigureAwait(false);
