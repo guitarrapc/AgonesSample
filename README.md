@@ -35,9 +35,7 @@ kubectl delete -f ./k8s/deployment.yaml
 
 # Note
 
-Run docker-compose to emulate AgonesSDK.
-
-Prepare compose.yaml like follows.
+Run docker-compose to emulate AgonesSDK. Use [examples/docker/compose.yaml](https://github.com/guitarrapc/AgonesSample/blob/main/examples/docker/compose.yaml).
 
 ```yaml
 services:
