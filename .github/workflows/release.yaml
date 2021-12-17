@@ -1,0 +1,78 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "tag: git tag you want create. (sample v1.0.0)"
+        required: true
+      dry_run:
+        description: "dry_run: true will never create release/nuget."
+        required: true
+        default: "false"
+
+env:
+  OWNER: guitarrapc
+  IMAGE_NAME: docker-awscli-kubectl
+  DOCKER_BUILDKIT: 1
+  GIT_TAG: ${{ github.event.inputs.tag }}
+  DRY_RUN: ${{ github.event.inputs.dry_run }}
+
+jobs:
+  build-release:
+    strategy:
+      matrix:
+        project: ["SimpleServer", "SimpleFrontEnd"]
+        include:
+          - project: "SimpleServer"
+            docker-image: guitarrapc/agonessample-simpleserver
+          - project: "SimpleFrontEnd"
+            docker-image: guitarrapc/agonessample-simplefrontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      # docker build and scan
+      - name: Docker Build
+        run: |
+          docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t ${{ matrix.docker-image }}:latest .
+          docker tag ${{ matrix.docker-image }}:latest ${{ matrix.docker-image }}:${{ env.GIT_TAG }}
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ matrix.docker-image }}:latest"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+      # docker push
+      - run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+        env:
+          DOCKER_USER: ${{ secrets.SYNCED_DOCKER_USER }}
+          DOCKER_PASS: ${{ secrets.SYNCED_DOCKER_PASS }}
+      - run: docker push ${{ matrix.docker-image }}
+        if: ${{ env.DRY_RUN  == 'false' }}
+      - run: docker push ${{ matrix.docker-image }}:${{ env.GIT_TAG }}
+        if: ${{ env.DRY_RUN  == 'false' }}
+      # tag
+      - run: git tag ${{ env.GIT_TAG }}
+        if: ${{ env.DRY_RUN  == 'false' }}
+      - name: Push changes
+        if: ${{ env.DRY_RUN  == 'false' }}
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.SYNCED_GITHUB_TOKEN_REPO }}
+          branch: ${{ github.ref }}
+          tags: true
+      # release
+      - uses: actions/create-release@v1
+        if: ${{ env.DRY_RUN  == 'false' }}
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.SYNCED_GITHUB_TOKEN_REPO }}
+        with:
+          tag_name: ${{ env.GIT_TAG }}
+          release_name: ${{ env.GIT_TAG }}
+          draft: true
+          prerelease: false
