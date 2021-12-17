@@ -16,6 +16,8 @@ public class AgonesEmuratedSdk : IAgonesSDK
     private bool _healthChecked;
     private readonly GameServer _gameServer;
 
+    private bool IsShutdowned => _status == AgonesState.Shutdown;
+
     public AgonesEmuratedSdk(IOptions<AgonesOptions>? options = null, ILogger? logger = null)
     {
         _logger = logger;
@@ -26,7 +28,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
         {
             ObjectMeta = new GameServer.Types.ObjectMeta
             {
-                Name = Environment.MachineName,
+                Name = "DummyGameServer",
                 Namespace = "default",
             },
             Spec = new GameServer.Types.Spec
@@ -40,7 +42,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
             },
             Status = new GameServer.Types.Status
             {
-                Address = "127.0.0.1",
+                Address = AgonesHelper.GetLocalIPv4(),
                 State = AgonesState.Scheduled.ToString(),
             },
         };
@@ -51,13 +53,11 @@ public class AgonesEmuratedSdk : IAgonesSDK
         });
     }
 
-    private bool IsShutdowned => _status == AgonesState.Shutdown;
-
     public Task<Status> AllocateAsync()
     {
         _logger?.LogDebug($"{nameof(AllocateAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         if (!_connected)
-            throw new HttpRequestException($"Please run {ConnectAsync} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
         if (IsShutdowned)
             throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
@@ -75,10 +75,9 @@ public class AgonesEmuratedSdk : IAgonesSDK
     public Task<bool> ConnectAsync()
     {
         _logger?.LogDebug($"{nameof(ConnectAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
         _connected = true;
+        _status = AgonesState.Scheduled;
         return Task.FromResult(true);
     }
 
@@ -90,7 +89,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
     {
         _logger?.LogDebug($"{nameof(GetGameServerAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         if (!_connected)
-            throw new HttpRequestException($"Please run {ConnectAsync} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
         if (IsShutdowned)
             throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
@@ -101,7 +100,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
     {
         _logger?.LogDebug($"{nameof(HealthAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         if (!_connected)
-            throw new HttpRequestException($"Please run {ConnectAsync} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
         if (IsShutdowned)
             throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
@@ -113,7 +112,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
     {
         _logger?.LogDebug($"{nameof(ReadyAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         if (!_connected)
-            throw new HttpRequestException($"Please run {ConnectAsync} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
         if (IsShutdowned)
             throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
@@ -126,7 +125,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
     {
         _logger?.LogDebug($"{nameof(ReserveAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         if (!_connected)
-            throw new HttpRequestException($"Please run {ConnectAsync} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
         if (IsShutdowned)
             throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
@@ -139,7 +138,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
     {
         _logger?.LogDebug($"{nameof(SetAnnotationAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         if (!_connected)
-            throw new HttpRequestException($"Please run {ConnectAsync} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
         if (IsShutdowned)
             throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
@@ -155,7 +154,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
     {
         _logger?.LogDebug($"{nameof(SetLabelAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         if (!_connected)
-            throw new HttpRequestException($"Please run {ConnectAsync} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
         if (IsShutdowned)
             throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
@@ -169,15 +168,14 @@ public class AgonesEmuratedSdk : IAgonesSDK
 
     public Task<Status> ShutDownAsync()
     {
+        // You can recover via calling ConnectAsync.
         _logger?.LogDebug($"{nameof(ShutDownAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         if (!_connected)
-            throw new HttpRequestException($"Please run {ConnectAsync} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
         if (IsShutdowned)
             throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
 
         _status = AgonesState.Shutdown;
-        _connected = false;
-        _healthChecked = false;
         return Task.FromResult(Status.DefaultSuccess);
     }
 
