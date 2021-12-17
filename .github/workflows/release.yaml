@@ -19,7 +19,7 @@ env:
   DRY_RUN: ${{ github.event.inputs.dry_run }}
 
 jobs:
-  build-release:
+  docker:
     strategy:
       matrix:
         project: ["SimpleServer", "SimpleFrontEnd"]
@@ -55,6 +55,12 @@ jobs:
         if: ${{ env.DRY_RUN  == 'false' }}
       - run: docker push ${{ matrix.docker-image }}:${{ env.GIT_TAG }}
         if: ${{ env.DRY_RUN  == 'false' }}
+
+  git:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
       # tag
       - run: git tag ${{ env.GIT_TAG }}
         if: ${{ env.DRY_RUN  == 'false' }}
