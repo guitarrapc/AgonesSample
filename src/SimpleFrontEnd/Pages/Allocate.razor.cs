@@ -13,8 +13,16 @@ public partial class Allocate : ComponentBase
 
     public string? Result { get; set; }
     public string[] List { get; set; } = Array.Empty<string>();
-    public string Host { get; set; } = KubernetesServiceProvider.Current.IsRunningOnKubernetes ? "" : "localhost";
-    public int Port { get; set; } = KubernetesServiceProvider.Current.IsRunningOnKubernetes ? 0 : 5157;
+    public string Host { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
+        ? DockerServiceProvider.Current.IsRunningOnDocker
+            ? "server" // docker
+            : "localhost" // local machine
+        : ""; // kubernetes
+    public int Port { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
+        ? DockerServiceProvider.Current.IsRunningOnDocker
+            ? 80 // docker
+            : 5157 // local machine
+        : 0; // kubernetes
 
     private async Task TestKubernetesApiAsync()
     {
