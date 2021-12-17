@@ -35,7 +35,7 @@ jobs:
       # docker build and scan
       - name: Docker Build
         run: |
-          docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t ${{ matrix.docker-image }}:latest .
+          docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t ${{ matrix.docker-image }}:latest -f src/${{ matrix.project }}/Dockerfile .
           docker tag ${{ matrix.docker-image }}:latest ${{ matrix.docker-image }}:${{ env.GIT_TAG }}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
