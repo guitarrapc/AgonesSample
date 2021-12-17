@@ -1,4 +1,5 @@
 ﻿using Agones;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using SimpleShared;
@@ -23,6 +24,7 @@ public static class AgoneSdkServiceExtensions
             var loggerFactory = sp.GetService<ILoggerFactory>();
             var logger = loggerFactory?.CreateLogger("AgonesSdk");
             var options = sp.GetRequiredService<IOptions<AgonesOptions>>();
+
             IAgonesSDK sdk = KubernetesServiceProvider.Current.IsRunningOnKubernetes
                 ? new AgonesSDK(cancellationTokenSource: options.Value.SdkCancellationTokenSource, logger: logger)
                 : new AgonesEmuratedSdk(options, logger);
