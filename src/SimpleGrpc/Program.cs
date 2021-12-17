@@ -1,4 +1,4 @@
-﻿using SimpleGrpc.AgonesAspNetCore;
+﻿using AgonesAspNetCore;
 using SimpleGrpc.Services;
 
 namespace SimpleGrpc;
@@ -30,7 +30,7 @@ public class Program
         // Add services to the container.
         builder.Services.AddGrpc();
         builder.Services.AddMagicOnion();
-        builder.Services.AddAgonesSdk();
+        builder.Services.AddAgonesSdk().UseHostedService();
 
         var app = builder.Build();
 

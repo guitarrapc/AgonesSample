@@ -1,6 +1,4 @@
-﻿using Agones;
-
-namespace SimpleGrpc.AgonesAspNetCore;
+﻿namespace AgonesAspNetCore;
 
 public class AgonesHostedService : IHostedService
 {
@@ -21,7 +19,7 @@ public class AgonesHostedService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _healthKeeper.DisposeAsync();
+        await _healthKeeper.DisposeAsync().ConfigureAwait(false);
         if (_task is not null)
             await _task.ConfigureAwait(false);
     }

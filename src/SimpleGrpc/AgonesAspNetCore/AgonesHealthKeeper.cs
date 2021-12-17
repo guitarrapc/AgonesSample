@@ -1,22 +1,22 @@
 ﻿using Agones;
-using SimpleShared;
+using Microsoft.Extensions.Options;
 
-namespace SimpleGrpc.AgonesAspNetCore;
+namespace AgonesAspNetCore;
 
 public class AgonesHealthKeeper : IAsyncDisposable
 {
-    private readonly AgonesSDK _agonesSdk;
-    private readonly AgonesOption _option;
+    private readonly IAgonesSDK _agonesSdk;
+    private readonly IOptions<AgonesOptions> _option;
     private readonly AgonesCondition _condition;
     private readonly CancellationTokenSource _cts = new();
     private readonly ILogger<AgonesHealthKeeper> _logger;
 
     private Task? _taskLoop = null;
 
-    public AgonesHealthKeeper(AgonesSDK agonesSdk, AgonesOption option, AgonesCondition condition, ILogger<AgonesHealthKeeper> logger)
+    public AgonesHealthKeeper(IAgonesSDK agonesSdk, IOptions<AgonesOptions> options, AgonesCondition condition, ILogger<AgonesHealthKeeper> logger)
     {
         _agonesSdk = agonesSdk;
-        _option = option;
+        _option = options;
         _condition = condition;
         _logger = logger;
     }
@@ -24,7 +24,7 @@ public class AgonesHealthKeeper : IAsyncDisposable
     public async Task ExecuteAsync()
     {
         // initial delay before begin health check
-        await Task.Delay(_option.HealthcheckDelay).ConfigureAwait(false);
+        await Task.Delay(_option.Value.HealthcheckDelay).ConfigureAwait(false);
 
         _logger.LogInformation("Initializing AgonesSdk.");
         await InitializeAsync().ConfigureAwait(false);
@@ -35,65 +35,39 @@ public class AgonesHealthKeeper : IAsyncDisposable
 
     private async Task InitializeAsync()
     {
-        // Agones should run when running on Kubernetes. Otherwise ignore it.
-        // todo: emulate agones sdk for local usage.
-        if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
-        {
-            _logger.LogInformation("Not running on Kubernetes, emulate AgonesSdk.");
-            _condition.IsEmulating = true;
-            _condition.IsConnected = true;
-            _condition.State = AgonesState.Ready;
-        }
-        else
-        {
-            _logger.LogInformation("Running on Kubernetes, Connect to AgonesSdk.");
+        _logger.LogInformation("Connect to AgonesSdk.");
 
-            // Let's connect to Agones Sdk.
-            var connected = await _agonesSdk.ConnectAsync().ConfigureAwait(false);
-            _condition.IsConnected = connected;
-            if (!connected)
-            {
-                _logger.LogInformation("AgonesSdk connection failed.");
-                throw new OperationCanceledException(nameof(AgonesHostedService));
-            }
-            _condition.State = AgonesState.Scheduled;
-
-            // Set Status to ready.
-            _logger.LogInformation("AgonesSdk connection success change state to Ready.");
-            await _agonesSdk.ReadyAsync().ConfigureAwait(false);
-            _condition.State = AgonesState.Ready;
+        // Let's connect to Agones Sdk.
+        var connected = await _agonesSdk.ConnectAsync().ConfigureAwait(false);
+        _condition.Connected(connected);
+        if (!connected)
+        {
+            _logger.LogInformation("AgonesSdk connection failed.");
+            throw new OperationCanceledException(nameof(AgonesHostedService));
         }
+
+        // Set Status to ready.
+        _logger.LogInformation("AgonesSdk connection success change state to Ready.");
+        await _agonesSdk.ReadyAsync().ConfigureAwait(false);
+        _condition.UpdateState(AgonesState.Ready);
     }
 
     private Task KeepAsync()
     {
-        if (_condition.IsEmulating)
-        {
-            _logger.LogInformation("You are running on emulation mode, stop health check loop.");
-            _condition.HealthStatus = true;
-            return Task.CompletedTask;
-        }
+        _logger.LogInformation("Health checking with AgonesSdk.");
 
+        // check both AgonesSdk's cancellation token and Keeper's cancellation token.
+        var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, _option.Value.SdkCancellationTokenSource.Token);
         _taskLoop = Task.Run(async () =>
         {
-            _logger.LogInformation("Health checking with Agones-sdk sidecar.");
-
             // loop to keep health check
-            while (!_cts.IsCancellationRequested)
+            while (!linkedCts.IsCancellationRequested)
             {
-                if (_condition.IsConnected)
-                {
-                    var status = await _agonesSdk.HealthAsync().ConfigureAwait(false);
-                    _condition.HealthStatus = status.StatusCode == Grpc.Core.StatusCode.OK;
-                }
-                else
-                {
-                    _logger.LogInformation("Still not connected with AgonesSdk, wait for next loop.");
-                    _condition.HealthStatus = false;
-                }
-
-                await Task.Delay(_option.HealthcheckInterval).ConfigureAwait(false);
+                var status = await _agonesSdk.HealthAsync().ConfigureAwait(false);
+                _condition.Healthy(status.StatusCode);
+                await Task.Delay(_option.Value.HealthcheckInterval).ConfigureAwait(false);
             }
+            linkedCts.Dispose();
         });
 
         return Task.CompletedTask;
@@ -102,6 +76,10 @@ public class AgonesHealthKeeper : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         _cts.Cancel();
+
+        if (_option.Value.SdkCancellationTokenSource is not null)
+            _option.Value.SdkCancellationTokenSource.Cancel();
+
         if (_taskLoop is not null)
             await _taskLoop.ConfigureAwait(false);
     }

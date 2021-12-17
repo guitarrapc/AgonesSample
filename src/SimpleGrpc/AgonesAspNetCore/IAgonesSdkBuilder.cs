@@ -1,4 +1,4 @@
-﻿namespace SimpleGrpc.AgonesAspNetCore;
+﻿namespace AgonesAspNetCore;
 
 public interface IAgonesSdkBuilder
 {

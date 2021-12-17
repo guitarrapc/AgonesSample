@@ -1,34 +1,50 @@
 ﻿using Agones;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
+using SimpleShared;
 
-namespace SimpleGrpc.AgonesAspNetCore;
+namespace AgonesAspNetCore;
 
 public static class AgoneSdkServiceExtensions
 {
-    public static IAgonesSdkBuilder AddAgonesSdk(this IServiceCollection services, Action<AgonesSDK, AgonesOption>? configure = null)
+    public static IAgonesSdkBuilder AddAgonesSdk(this IServiceCollection services, Action<AgonesOptions>? configureOptions = null)
     {
-        return services.AddAgonesSdkCore(configure);
+        return services.AddAgonesSdkCore(configureOptions);
     }
 
-    private static IAgonesSdkBuilder AddAgonesSdkCore(this IServiceCollection services, Action<AgonesSDK, AgonesOption>? configure)
+    private static IAgonesSdkBuilder AddAgonesSdkCore(this IServiceCollection services, Action<AgonesOptions>? configureOptions)
     {
-        // Configure
-        var sdk = new AgonesSDK();
-        var option = new AgonesOption();
-        if (configure != null)
-        {
-            configure(sdk, option);
-        }
+
+        var configName = Options.DefaultName;
 
         // Add DI
-        services.TryAddSingleton(sdk);
-        services.TryAddSingleton(option);
+        services.TryAddSingleton<IAgonesSDK>(sp =>
+        {
+            var loggerFactory = sp.GetService<ILoggerFactory>();
+            var logger = loggerFactory?.CreateLogger("AgonesSdk");
+            var options = sp.GetRequiredService<IOptions<AgonesOptions>>();
+            IAgonesSDK sdk = KubernetesServiceProvider.Current.IsRunningOnKubernetes
+                ? new AgonesSDK(cancellationTokenSource: options.Value.SdkCancellationTokenSource, logger: logger)
+                : new AgonesEmuratedSdk(options, logger);
+            return sdk;
+        });
         services.TryAddSingleton<AgonesCondition>();
         services.TryAddSingleton<AgonesHealthKeeper>();
 
-        // Add HostedService
-        services.AddHostedService<AgonesHostedService>();
+        services.AddOptions<AgonesOptions>(configName)
+            .Configure<IConfiguration>((o, configuration) =>
+            {
+                configuration.GetSection(string.IsNullOrWhiteSpace(configName) ? "AgonesSdk" : configName).Bind(o);
+                configureOptions?.Invoke(o);
+            });
 
         return new AgonesSdkBuilder(services);
+    }
+
+    public static IAgonesSdkBuilder UseHostedService(this IAgonesSdkBuilder builder)
+    {
+        // Add HostedService
+        builder.Services.AddHostedService<AgonesHostedService>();
+        return builder;
     }
 }
