@@ -7,5 +7,5 @@ services:
   server:
     image: guitarrapc/agonessample-simpleserver:v0.9.0
     ports:
-      - 5157:80
+      - 5157:5157
     restart: on-failure:1 # emulate new pod when shutdown
