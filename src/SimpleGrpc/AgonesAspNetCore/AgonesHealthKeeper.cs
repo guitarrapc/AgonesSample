@@ -11,6 +11,8 @@ public class AgonesHealthKeeper : IAsyncDisposable
     private readonly CancellationTokenSource _cts = new();
     private readonly ILogger<AgonesHealthKeeper> _logger;
 
+    private PeriodicTimer? _timer;
+    private CancellationTokenSource? _linkedCts;
     private Task? _taskLoop = null;
 
     public AgonesHealthKeeper(IAgonesSDK agonesSdk, IOptions<AgonesOptions> options, AgonesCondition condition, ILogger<AgonesHealthKeeper> logger)
@@ -57,17 +59,26 @@ public class AgonesHealthKeeper : IAsyncDisposable
         _logger.LogInformation("Health checking with AgonesSdk.");
 
         // check both AgonesSdk's cancellation token and Keeper's cancellation token.
-        var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, _option.Value.SdkCancellationTokenSource.Token);
+        _timer = new PeriodicTimer(_option.Value.HealthcheckInterval);
+        _linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, _option.Value.SdkCancellationTokenSource.Token);
         _taskLoop = Task.Run(async () =>
         {
             // loop to keep health check
-            while (!linkedCts.IsCancellationRequested)
+            while (!_linkedCts.IsCancellationRequested)
             {
-                var status = await _agonesSdk.HealthAsync().ConfigureAwait(false);
-                _condition.Healthy(status.StatusCode);
-                await Task.Delay(_option.Value.HealthcheckInterval).ConfigureAwait(false);
+                try
+                {
+                    var status = await _agonesSdk.HealthAsync().ConfigureAwait(false);
+                    _condition.Healthy(status.StatusCode);
+                }
+                catch (Grpc.Core.RpcException ex)
+                {
+                    _logger.LogError(ex.Message, ex);
+                    throw;
+                }
+
+                await _timer.WaitForNextTickAsync().ConfigureAwait(false);
             }
-            linkedCts.Dispose();
         });
 
         return Task.CompletedTask;
@@ -82,5 +93,8 @@ public class AgonesHealthKeeper : IAsyncDisposable
 
         if (_taskLoop is not null)
             await _taskLoop.ConfigureAwait(false);
+
+        _linkedCts?.Dispose();
+        _timer?.Dispose();
     }
 }
