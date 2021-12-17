@@ -1,11 +1,11 @@
 services:
   frontend:
-    image: agonessample-simplefrontend:v0.9.0
+    image: guitarrapc/agonessample-simplefrontend:v0.9.0
     ports:
       - 5104:80
 
   server:
-    image: agonessample-simpleserver:v0.9.0
+    image: guitarrapc/agonessample-simpleserver:v0.9.0
     ports:
       - 5157:80
     restart: on-failure:1 # emulate new pod when shutdown

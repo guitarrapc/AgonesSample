@@ -5,7 +5,7 @@ services:
       context: .
     image: agonessample-simplefrontend:dev
     ports:
-      - 5005:80
+      - 5104:80
 
   server:
     build:
@@ -13,4 +13,5 @@ services:
       context: .
     image: agonessample-simpleserver:dev
     ports:
-      - 5006:80
+      - 5157:80
+    restart: on-failure:1 # emulate new pod when shutdown
