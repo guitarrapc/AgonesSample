@@ -9,7 +9,11 @@ public class AgonesOptions
     /// <summary>
     /// AgonesSDK Emulator Return port
     /// </summary>
-    public int EmulatedSdkPort { get; set; }
+    public int EmulateSdkPort { get; set; } = 80;
+    /// <summary>
+    /// true to emulate shutdown = never shutdown. false to shutdown via Environment.Exit
+    /// </summary>
+    public bool EmulateSdkNoShutdown { get; set; }
     /// <summary>
     /// Healthcheck Initial Delay period to begin.
     /// </summary>

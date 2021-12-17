@@ -71,6 +71,10 @@ public class AgonesHealthKeeper : IAsyncDisposable
                     var status = await _agonesSdk.HealthAsync().ConfigureAwait(false);
                     _condition.Healthy(status.StatusCode);
                 }
+                catch (HttpRequestException ex)
+                {
+                    _logger.LogError(ex.Message, ex);
+                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex.Message, ex);

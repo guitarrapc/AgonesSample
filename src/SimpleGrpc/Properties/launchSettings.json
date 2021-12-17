@@ -3,9 +3,9 @@
     "SimpleGrpc": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
       },
-      "applicationUrl": "http://localhost:5217",
+      "applicationUrl": "http://localhost:5157",
       "dotnetRunMessages": true
     },
     "Docker": {
@@ -19,7 +19,7 @@
       "launchUrl": "http://localhost:5217",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://localhost:5217"
+        "ASPNETCORE_URLS": "http://localhost:5157"
       },
       "distributionName": ""
     }
