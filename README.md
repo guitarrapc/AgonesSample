@@ -35,8 +35,27 @@ kubectl delete -f ./k8s/deployment.yaml
 
 # Note
 
-Run on local via VisualStudio or docker-compose.
+Run docker-compose to emulate AgonesSDK.
 
+```yaml
+services:
+  frontend:
+    build:
+      dockerfile: ./src/SimpleFrontEnd/Dockerfile
+      context: .
+    image: agonessample-simplefrontend:dev
+    ports:
+      - 5005:80
+
+  server:
+    build:
+      dockerfile: ./src/SimpleServer/Dockerfile
+      context: .
+    image: agonessample-simpleserver:dev
+    ports:
+      - 5006:80
 ```
+
+```shell
 docker compose up --build
 ```
