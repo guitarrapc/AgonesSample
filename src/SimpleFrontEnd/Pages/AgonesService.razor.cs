@@ -14,7 +14,11 @@ public partial class AgonesService : ComponentBase
     private string? _address;
     public string Result { get; set; } = "";
     public string Detail { get; set; } = "";
-    public string Input { get; set; } = KubernetesServiceProvider.Current.IsRunningOnKubernetes ? "" : "localhost:5157";
+    public string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
+        ? DockerServiceProvider.Current.IsRunningOnDocker
+            ? "server:80" // docker
+            : "localhost:5157" // local machine
+        : ""; // kubernetes
 
     private async Task AllocateAsync()
     {
