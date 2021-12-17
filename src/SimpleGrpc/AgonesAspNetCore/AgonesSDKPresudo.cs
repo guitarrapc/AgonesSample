@@ -6,9 +6,9 @@ using Microsoft.Extensions.Options;
 namespace AgonesAspNetCore;
 
 /// <summary>
-/// AgonesSDK Emurator for non-Kubernetes Environment.
+/// Presudo AgonesSDK for non-Kubernetes Environment.
 /// </summary>
-public class AgonesEmuratedSdk : IAgonesSDK
+public class AgonesSDKPresudo : IAgonesSDK
 {
     private readonly IOptions<AgonesOptions>? _options;
     private readonly ILogger? _logger;
@@ -19,7 +19,7 @@ public class AgonesEmuratedSdk : IAgonesSDK
 
     private bool IsShutdowned => _status == AgonesState.Shutdown;
 
-    public AgonesEmuratedSdk(IOptions<AgonesOptions>? options = null, ILogger? logger = null)
+    public AgonesSDKPresudo(IOptions<AgonesOptions>? options = null, ILogger? logger = null)
     {
         _options = options;
         _logger = logger;

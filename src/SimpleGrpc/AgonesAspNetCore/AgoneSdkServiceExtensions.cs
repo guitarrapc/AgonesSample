@@ -27,7 +27,7 @@ public static class AgoneSdkServiceExtensions
 
             IAgonesSDK sdk = KubernetesServiceProvider.Current.IsRunningOnKubernetes
                 ? new AgonesSDK(cancellationTokenSource: options.Value.SdkCancellationTokenSource, logger: logger)
-                : new AgonesEmuratedSdk(options, logger);
+                : new AgonesSDKPresudo(options, logger);
             return sdk;
         });
         services.TryAddSingleton<AgonesCondition>();
