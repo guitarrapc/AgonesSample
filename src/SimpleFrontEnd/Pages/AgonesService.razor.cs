@@ -34,7 +34,7 @@ public partial class AgonesService : ComponentBase
         catch (Exception ex)
         {
             Result = ex.Message;
-            Detail = ex.StackTrace;
+            Detail = ex.StackTrace ?? "";
         }
     }
 
@@ -46,13 +46,13 @@ public partial class AgonesService : ComponentBase
             using var channel = GrpcChannel.ForAddress(_address);
             var service = MagicOnionClient.Create<IAgonesService>(channel);
             var result = await service.ConnectAsync();
-            Result = $"{(result.Success ? "Success" : "Failed")} {result.Detail}";
+            Result = result.Success ? "Success" : "Failed";
             Detail = $"Connected to AgonesSdk. {result.Detail}";
         }
         catch (Exception ex)
         {
             Result = ex.Message;
-            Detail = ex.StackTrace;
+            Detail = ex.StackTrace ?? "";
         }
     }
 
@@ -64,13 +64,13 @@ public partial class AgonesService : ComponentBase
             using var channel = GrpcChannel.ForAddress(_address);
             var service = MagicOnionClient.Create<IAgonesService>(channel);
             var result = await service.ReadyAsync();
-            Result = $"{(result.Success ? "Success" : "Failed")}";
+            Result = result.Success ? "Success" : "Failed";
             Detail = $"Status change to Ready. {result.Detail}";
         }
         catch (Exception ex)
         {
             Result = ex.Message;
-            Detail = ex.StackTrace;
+            Detail = ex.StackTrace ?? "";
         }
     }
 
@@ -82,13 +82,13 @@ public partial class AgonesService : ComponentBase
             using var channel = GrpcChannel.ForAddress(_address);
             var service = MagicOnionClient.Create<IAgonesService>(channel);
             var result = await service.GetGameServerAsync();
-            Result = $"{(result.Success ? "Success" : "Failed")}";
+            Result = result.Success ? "Success" : "Failed";
             Detail = result.Detail;
         }
         catch (Exception ex)
         {
             Result = ex.Message;
-            Detail = ex.StackTrace;
+            Detail = ex.StackTrace ?? "";
         }
     }
 
@@ -100,13 +100,13 @@ public partial class AgonesService : ComponentBase
             using var channel = GrpcChannel.ForAddress(_address);
             var service = MagicOnionClient.Create<IAgonesService>(channel);
             var result = await service.ShutdownAsync();
-            Result = $"{(result.Success ? "Success" : "Failed")} {result.Detail}";
+            Result = result.Success ? "Success" : "Failed";
             Detail = $"Status change to Shutdown. {result.Detail}";
         }
         catch (Exception ex)
         {
             Result = ex.Message;
-            Detail = ex.StackTrace;
+            Detail = ex.StackTrace ?? "";
         }
     }
 }
