@@ -34,6 +34,11 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        else
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
         var summaries = new[]
         {
