@@ -155,10 +155,7 @@ public class AgonesSDKPresudo : IAgonesSDK
         if (!_connected)
             throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
 
-        if (!_gameServer.ObjectMeta.Annotations.TryAdd(key, value))
-        {
-            _gameServer.ObjectMeta.Annotations[key] = value;
-        }
+        _gameServer.ObjectMeta.Annotations[key] = value;
 
         return Task.FromResult(Status.DefaultSuccess);
     }
@@ -171,10 +168,7 @@ public class AgonesSDKPresudo : IAgonesSDK
         if (!_connected)
             throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
 
-        if (!_gameServer.ObjectMeta.Labels.TryAdd(key, value))
-        {
-            _gameServer.ObjectMeta.Labels[key] = value;
-        }
+        _gameServer.ObjectMeta.Labels[key] = value;
 
         return Task.FromResult(Status.DefaultSuccess);
     }
