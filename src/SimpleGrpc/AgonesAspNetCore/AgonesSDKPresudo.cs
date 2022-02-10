@@ -26,11 +26,15 @@ public class AgonesSDKPresudo : IAgonesSDK
         _status = AgonesState.Scheduled;
         _connected = false;
         _healthChecked = false;
+
+        var fleetName = options.Value.EmulateSdkFleetName.ToLower();
+        var (gssName, gsName) = GetGameServerNames(fleetName);
+
         _gameServer = new GameServer()
         {
             ObjectMeta = new GameServer.Types.ObjectMeta
             {
-                Name = options.Value.EmulateSdkName,
+                Name = gsName,
                 Namespace = options.Value.EmulateSdkNameSpace,
             },
             Spec = new GameServer.Types.Spec
@@ -48,10 +52,12 @@ public class AgonesSDKPresudo : IAgonesSDK
                 State = AgonesState.Scheduled.ToString(),
             },
         };
+        _gameServer.ObjectMeta.Labels.TryAdd("agones.dev/fleet", fleetName);
+        _gameServer.ObjectMeta.Labels.TryAdd("agones.dev/gameserverset", gssName);
         _gameServer.Status.Ports.Add(new GameServer.Types.Status.Types.Port
         {
             Name = "default",
-            Port_ = options?.Value.EmulateSdkPort ?? 80,
+            Port_ = options.Value.EmulateSdkPort,
         });
     }
 
@@ -186,7 +192,7 @@ public class AgonesSDKPresudo : IAgonesSDK
         _gameServer.Status.State = AgonesState.Shutdown.ToString();
         if (!_options?.Value.EmulateSdkNoShutdown ?? false)
         {
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 await Task.Delay(3 * 1000);
                 Environment.Exit(99); // Let's indicate custom error code for docker restart.
@@ -199,5 +205,39 @@ public class AgonesSDKPresudo : IAgonesSDK
     {
         _logger?.LogDebug($"{nameof(WatchGameServer)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
         callback(_gameServer);
+    }
+
+    /// <summary>
+    /// Get GameServer Name and GameServerSet Name.
+    /// Fleet -> GameServerSet -> GameServer
+    /// </summary>
+    /// <param name="fleetName"></param>
+    /// <returns></returns>
+    private (string GameServerSetName, string GameServerName) GetGameServerNames(string fleetName)
+    {
+        // generate random string for specific length.
+        string HashString(string text, int length)
+        {
+            const string chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+            var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+
+            using var sha1 = System.Security.Cryptography.SHA1.Create();
+            var hash = sha1.ComputeHash(bytes);
+
+            var outputHash = new char[length];
+            for (var i = 0; i < outputHash.Length; i++)
+            {
+                outputHash[i] = chars[hash[i] % chars.Length];
+            }
+
+            return new string(outputHash);
+        }
+
+        // always generate random when called
+        var num = System.Security.Cryptography.RandomNumberGenerator.GetInt32(0, 1000000);
+
+        var gssName = fleetName + "-" + HashString(fleetName, 5);
+        var gsName = gssName + "-" + HashString(num.ToString(), 5);
+        return (gssName, gsName);
     }
 }
