@@ -24,13 +24,25 @@ public class AgonesAllocationService
     /// <returns></returns>
     public async Task<string> GetKubernetesApiAsync()
     {
-        if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
+        if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
         {
-            return $"Frontend is not running Kubernetes. Use Agones instead of Kubernetes when AgonesServer address is input to 'Input'.";
+            return await _kubernetesApi.SendKubernetesApiAsync("/api", HttpMethod.Get);
         }
         else
         {
-            return await _kubernetesApi.SendKubernetesApiAsync("/api", HttpMethod.Get);
+            return $"Frontend is not running Kubernetes. Use Agones instead of Kubernetes when AgonesServer address is input to 'Input'.";
+        }
+    }
+
+    public async Task<string> SendAllocationAsync(string @namespace, string fleetName, string address)
+    {
+        if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
+        {
+            return await SendAllocationKubernetesAsync(@namespace, fleetName);
+        }
+        else
+        {
+            return await SendAllocationAgonesAsync(address);
         }
     }
 
@@ -38,7 +50,7 @@ public class AgonesAllocationService
     /// Send Allocation request to Agones.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> SendAllocationAsync(string @namespace, string fleetName)
+    private async Task<string> SendAllocationKubernetesAsync(string @namespace, string fleetName)
     {
         var body = KubernetesAgonesGameServerAllocationRequest.CreateRequest("allocation", fleetName);
         var json = JsonSerializer.Serialize(body);
@@ -63,7 +75,7 @@ public class AgonesAllocationService
     /// Send Allocation request to Agones.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> SendAllocationAgonesAsync(string address)
+    private async Task<string> SendAllocationAgonesAsync(string address)
     {
         var response = await _agonesServerRpcService.AllocateAsync(address);
 

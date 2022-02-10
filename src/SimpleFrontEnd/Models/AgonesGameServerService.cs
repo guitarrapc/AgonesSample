@@ -18,11 +18,23 @@ public class AgonesGameServerService
         _logger = logger;
     }
 
+    public async Task<KubernetesAgonesGameServerListResponse?> GetGameServersAsync(string @namespace)
+    {
+        if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
+        {
+            return await GetGameServersKubernetesAsync(@namespace);
+        }
+        else
+        {
+            return await GetGameServersAgonesAsync();
+        }
+    }
+
     /// <summary>
     /// Send Get request to Kubernetes /api endpoint.
     /// </summary>
     /// <returns></returns>
-    public async Task<KubernetesAgonesGameServerListResponse?> GetGameServersAsync(string @namespace)
+    private async Task<KubernetesAgonesGameServerListResponse?> GetGameServersKubernetesAsync(string @namespace)
     {
         // ref: https://agones.dev/site/docs/guides/access-api/
         var json = await _kubernetesApi.SendKubernetesApiAsync($"/apis/agones.dev/v1/namespaces/{@namespace}/gameservers", HttpMethod.Get);
@@ -34,7 +46,7 @@ public class AgonesGameServerService
     /// Send Allocation request to Agones.
     /// </summary>
     /// <returns></returns>
-    public async Task<KubernetesAgonesGameServerListResponse?> GetGameServersAgonesAsync()
+    private async Task<KubernetesAgonesGameServerListResponse?> GetGameServersAgonesAsync()
     {
         var servers = _database.Items.Select(x => $"http://{x}").ToArray();
         var tasks = servers.Select(x => _agonesServerRpcService.GetGameServerAsync(x));

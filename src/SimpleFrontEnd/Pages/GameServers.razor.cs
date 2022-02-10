@@ -18,42 +18,22 @@ public partial class GameServers : ComponentBase
     {
         try
         {
-            if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
-            {
-                var gameservers = await AgonesGameServerService.GetGameServersAgonesAsync();
-                Result = "Frontend is not running Kubernetse. You cannot execute allocate.";
-                List = gameservers?.items is not null
-                    ? gameservers!.items.Select(x => new GameServerViewModel
-                    {
-                        Address = x.status!.address,
-                        Port = x.status.ports![0].port,
+            var gameservers = await AgonesGameServerService.GetGameServersAsync("default");
+
+            Result = $"{gameservers?.items?.Length ?? 0} GameServers found.";
+            List = gameservers?.items is not null
+                ? gameservers!.items.Select(x => new GameServerViewModel
+                {
+                    Address = x.status!.address,
+                    Port = x.status.ports![0].port,
                     // 2021-12-09T06:35:40Z
                     Age = ConvertToAge(DateTime.UtcNow - x.metadata!.creationTimestamp),
-                        Name = x.metadata.name,
-                        Namespace = x.metadata.@namespace,
-                        Node = x.status.nodeName,
-                        Status = x.status.state,
-                    }).ToArray()
-                    : Array.Empty<GameServerViewModel>();
-            }
-            else
-            {
-                var gameservers = await AgonesGameServerService.GetGameServersAsync("default");
-                Result = $"{gameservers?.items?.Length ?? 0} GameServers found.";
-                List = gameservers?.items is not null
-                    ? gameservers!.items.Select(x => new GameServerViewModel
-                    {
-                        Address = x.status!.address,
-                        Port = x.status.ports![0].port,
-                        // 2021-12-09T06:35:40Z
-                        Age = ConvertToAge(DateTime.UtcNow - x.metadata!.creationTimestamp),
-                        Name = x.metadata.name,
-                        Namespace = x.metadata.@namespace,
-                        Node = x.status.nodeName,
-                        Status = x.status.state,
-                    }).ToArray()
-                    : Array.Empty<GameServerViewModel>();
-            }
+                    Name = x.metadata.name,
+                    Namespace = x.metadata.@namespace,
+                    Node = x.status.nodeName,
+                    Status = x.status.state,
+                }).ToArray()
+                : Array.Empty<GameServerViewModel>();
         }
         catch (Exception ex)
         {

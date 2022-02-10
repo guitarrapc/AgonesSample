@@ -25,37 +25,27 @@ public partial class Allocate : ComponentBase
         Result = apiResult;
 
         StateHasChanged();
-
     }
 
     private async Task AllocateAsync()
     {
-        if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
+        if (string.IsNullOrEmpty(Input))
         {
-            if (string.IsNullOrEmpty(Input))
-            {
-                Result = "Frontend is not running Kubernetse. Use Agones instead of Kubernetes when AgonesServer address is input.";
-                List = AgonesAllocationService.GetAllAllocationEntries();
-                return;
-            }
-
-            try
-            {
-                var host = await AgonesAllocationService.SendAllocationAgonesAsync($"http://{Input}");
-                Result = host;
-                List = AgonesAllocationService.GetAllAllocationEntries();
-            }
-            catch (Exception ex)
-            {
-                Result = ex.Message + $"{(ex.StackTrace != null ? " " + ex.StackTrace : "")}";
-                List = Array.Empty<string>();
-            }
+            Result = "Frontend is not running Kubernetse. Use Agones instead of Kubernetes when AgonesServer address is input.";
+            List = AgonesAllocationService.GetAllAllocationEntries();
+            return;
         }
-        else
+
+        try
         {
-            var host = await AgonesAllocationService.SendAllocationAsync("default", "simple-server");
+            var host = await AgonesAllocationService.SendAllocationAsync("default", "simple-server", $"http://{Input}");
             Result = host;
             List = AgonesAllocationService.GetAllAllocationEntries();
+        }
+        catch (Exception ex)
+        {
+            Result = ex.Message + $"{(ex.StackTrace != null ? " " + ex.StackTrace : "")}";
+            List = Array.Empty<string>();
         }
 
         StateHasChanged();
