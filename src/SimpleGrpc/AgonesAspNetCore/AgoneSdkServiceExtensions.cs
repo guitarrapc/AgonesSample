@@ -14,7 +14,6 @@ public static class AgoneSdkServiceExtensions
 
     private static IAgonesSdkBuilder AddAgonesSdkCore(this IServiceCollection services, Action<AgonesOptions>? configureOptions)
     {
-
         var configName = Options.DefaultName;
 
         // Add DI

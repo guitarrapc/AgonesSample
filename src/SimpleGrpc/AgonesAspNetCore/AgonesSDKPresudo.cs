@@ -10,7 +10,7 @@ namespace AgonesAspNetCore;
 /// </summary>
 public class AgonesSDKPresudo : IAgonesSDK
 {
-    private readonly IOptions<AgonesOptions>? _options;
+    private readonly IOptions<AgonesOptions> _options;
     private readonly ILogger? _logger;
     private AgonesState _status;
     private bool _connected;
@@ -19,7 +19,7 @@ public class AgonesSDKPresudo : IAgonesSDK
 
     private bool IsShutdowned => _status == AgonesState.Shutdown;
 
-    public AgonesSDKPresudo(IOptions<AgonesOptions>? options = null, ILogger? logger = null)
+    public AgonesSDKPresudo(IOptions<AgonesOptions> options, ILogger? logger = null)
     {
         _options = options;
         _logger = logger;
@@ -30,8 +30,8 @@ public class AgonesSDKPresudo : IAgonesSDK
         {
             ObjectMeta = new GameServer.Types.ObjectMeta
             {
-                Name = "DummyGameServer",
-                Namespace = "default",
+                Name = options.Value.EmulateSdkName,
+                Namespace = options.Value.EmulateSdkNameSpace,
             },
             Spec = new GameServer.Types.Spec
             {

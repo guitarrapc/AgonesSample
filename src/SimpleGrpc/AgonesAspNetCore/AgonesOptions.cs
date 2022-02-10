@@ -7,7 +7,15 @@ public class AgonesOptions
     /// </summary>
     public CancellationTokenSource SdkCancellationTokenSource { get; } = new CancellationTokenSource();
     /// <summary>
-    /// AgonesSDK Emulator Return port
+    /// AgonesSDK Emulator Return GameServer Name
+    /// </summary>
+    public string EmulateSdkName { get; set; } = "DummyGameServer";
+    /// <summary>
+    /// AgonesSDK Emulator Return GameServer Namespace
+    /// </summary>
+    public string EmulateSdkNameSpace { get; set; } = "DummyGameServer";
+    /// <summary>
+    /// AgonesSDK Emulator Return GameServer port
     /// </summary>
     public int EmulateSdkPort { get; set; } = 80;
     /// <summary>

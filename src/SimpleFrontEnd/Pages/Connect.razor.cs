@@ -2,7 +2,7 @@
 using Grpc.Net.Client;
 using MagicOnion.Client;
 using Microsoft.AspNetCore.Components;
-using SimpleFrontEnd.Data;
+using SimpleFrontEnd.Models;
 using SimpleShared;
 
 namespace SimpleFrontEnd.Pages;

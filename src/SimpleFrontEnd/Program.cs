@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using SimpleFrontEnd.Data;
+using SimpleFrontEnd.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddSingleton<IAgonesAllocationDatabase, InmemoryAgonesAllocatio
 builder.Services.AddSingleton<KubernetesApiService>();
 builder.Services.AddSingleton<AgonesAllocationService>();
 builder.Services.AddSingleton<AgonesGameServerService>();
+builder.Services.AddSingleton<AgonesServerRpcService>();
+
 builder.Services.AddHttpClient("kubernetes-api")
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
     {

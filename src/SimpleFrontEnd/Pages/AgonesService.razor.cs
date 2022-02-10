@@ -1,7 +1,5 @@
-﻿using Grpc.Net.Client;
-using MagicOnion.Client;
-using Microsoft.AspNetCore.Components;
-using SimpleFrontEnd.Data;
+﻿using Microsoft.AspNetCore.Components;
+using SimpleFrontEnd.Models;
 using SimpleShared;
 
 namespace SimpleFrontEnd.Pages;
@@ -9,9 +7,9 @@ namespace SimpleFrontEnd.Pages;
 public partial class AgonesService : ComponentBase
 {
     [Inject]
-    public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
+    public Models.AgonesServerRpcService AgonesServerService { get; set; } = default!;
 
-    private string? _address;
+    private string _address = "";
     public string Result { get; set; } = "";
     public string Detail { get; set; } = "";
     public string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
@@ -25,11 +23,9 @@ public partial class AgonesService : ComponentBase
         try
         {
             _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
-            using var channel = GrpcChannel.ForAddress(_address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.AllocateAsync();
-            Result = $"{(result.Success ? "Success" : "Failed")} {result.Detail}";
-            Detail = $"Status change to Allocated. {result.Detail}";
+            var result = await AgonesServerService.AllocateAsync(_address);
+            Result = result.Result;
+            Detail = result.Detail;
         }
         catch (Exception ex)
         {
@@ -43,11 +39,9 @@ public partial class AgonesService : ComponentBase
         try
         {
             _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
-            using var channel = GrpcChannel.ForAddress(_address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.ConnectAsync();
-            Result = result.Success ? "Success" : "Failed";
-            Detail = $"Connected to AgonesSdk. {result.Detail}";
+            var result = await AgonesServerService.ConnectAsync(_address);
+            Result = result.Result;
+            Detail = result.Detail;
         }
         catch (Exception ex)
         {
@@ -61,11 +55,9 @@ public partial class AgonesService : ComponentBase
         try
         {
             _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
-            using var channel = GrpcChannel.ForAddress(_address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.ReadyAsync();
-            Result = result.Success ? "Success" : "Failed";
-            Detail = $"Status change to Ready. {result.Detail}";
+            var result = await AgonesServerService.ReadyAsync(_address);
+            Result = result.Result;
+            Detail = result.Detail;
         }
         catch (Exception ex)
         {
@@ -79,10 +71,8 @@ public partial class AgonesService : ComponentBase
         try
         {
             _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
-            using var channel = GrpcChannel.ForAddress(_address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.GetGameServerAsync();
-            Result = result.Success ? "Success" : "Failed";
+            var result = await AgonesServerService.GetGameServerAsync(_address);
+            Result = result.Result;
             Detail = result.Detail;
         }
         catch (Exception ex)
@@ -97,11 +87,9 @@ public partial class AgonesService : ComponentBase
         try
         {
             _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
-            using var channel = GrpcChannel.ForAddress(_address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.ShutdownAsync();
-            Result = result.Success ? "Success" : "Failed";
-            Detail = $"Status change to Shutdown. {result.Detail}";
+            var result = await AgonesServerService.ShutdownAsync(_address);
+            Result = result.Result;
+            Detail = result.Detail;
         }
         catch (Exception ex)
         {

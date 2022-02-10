@@ -1,4 +1,4 @@
-﻿namespace SimpleFrontEnd.Data;
+﻿namespace SimpleFrontEnd.Models;
 
 public class InmemoryAgonesAllocationDatabase : IAgonesAllocationDatabase
 {
@@ -22,10 +22,4 @@ public class InmemoryAgonesAllocationDatabase : IAgonesAllocationDatabase
             Add(item);
         }
     }
-}
-
-public class AgonesAllocation
-{
-    public string? Host { get; set; }
-    public int? Port { get; set; }
 }

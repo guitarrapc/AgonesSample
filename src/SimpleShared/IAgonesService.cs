@@ -24,3 +24,4 @@ public class AgonesResult
         Detail = detail;
     }
 }
+

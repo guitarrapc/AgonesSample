@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using SimpleFrontEnd.Data;
+using SimpleFrontEnd.Models;
 using SimpleShared;
 
 namespace SimpleFrontEnd.Pages;
@@ -13,30 +13,16 @@ public partial class Allocate : ComponentBase
 
     public string? Result { get; set; }
     public string[] List { get; set; } = Array.Empty<string>();
-    public string Host { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
+    public string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
         ? DockerServiceProvider.Current.IsRunningOnDocker
-            ? "server" // docker
-            : "localhost" // local machine
+            ? "server:80" // docker
+            : "localhost:5157" // local machine
         : ""; // kubernetes
-    public int Port { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
-        ? DockerServiceProvider.Current.IsRunningOnDocker
-            ? 80 // docker
-            : 5157 // local machine
-        : 0; // kubernetes
 
     private async Task TestKubernetesApiAsync()
     {
-        if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
-        {
-            Result = "Frontend is not running Kubernetes. You cannot execute allocate.";
-            List = AgonesAllocationService.GetAllAllocationEntries();
-        }
-        else
-        {
-            var apiResult = await AgonesAllocationService.GetKubernetesApiAsync();
-            Result = apiResult;
-            List = AgonesAllocationService.GetAllAllocationEntries();
-        }
+        var apiResult = await AgonesAllocationService.GetKubernetesApiAsync();
+        Result = apiResult;
 
         StateHasChanged();
 
@@ -46,8 +32,24 @@ public partial class Allocate : ComponentBase
     {
         if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
         {
-            Result = "Frontend is not running Kubernetse. You cannot execute allocate.";
-            List = AgonesAllocationService.GetAllAllocationEntries();
+            if (string.IsNullOrEmpty(Input))
+            {
+                Result = "Frontend is not running Kubernetse. Use Agones instead of Kubernetes when AgonesServer address is input.";
+                List = AgonesAllocationService.GetAllAllocationEntries();
+                return;
+            }
+
+            try
+            {
+                var host = await AgonesAllocationService.SendAllocationAgonesAsync($"http://{Input}");
+                Result = host;
+                List = AgonesAllocationService.GetAllAllocationEntries();
+            }
+            catch (Exception ex)
+            {
+                Result = ex.Message + $"{(ex.StackTrace != null ? " " + ex.StackTrace : "")}";
+                List = Array.Empty<string>();
+            }
         }
         else
         {
@@ -61,12 +63,8 @@ public partial class Allocate : ComponentBase
 
     private Task ManualAllocateAsync()
     {
-        AgonesAllocationService.AddAllocationEntry(new AgonesAllocation
-        {
-            Host = Host,
-            Port = Port,
-        });
-        Result = $"http://{Host}:{Port}";
+        AgonesAllocationService.AddAllocationEntry(Input);
+        Result = $"http://{Input}";
         List = AgonesAllocationService.GetAllAllocationEntries();
 
         StateHasChanged();

@@ -2,7 +2,7 @@
 using System.Text.Json;
 using SimpleShared;
 
-namespace SimpleFrontEnd.Data;
+namespace SimpleFrontEnd.Models;
 
 public class KubernetesApiService
 {
@@ -30,7 +30,7 @@ public class KubernetesApiService
     /// <param name="path"></param>
     /// <param name="method"></param>
     /// <returns></returns>
-    public async Task<T> SendKubernetesApiAsync<T>(string path, HttpMethod method, HttpContent? content = null)
+    public async Task<ResponseT> SendKubernetesApiAsync<ResponseT>(string path, HttpMethod method, HttpContent? content = null)
     {
         var httpClient = _httpClientFactory.CreateClient("kubernetes-api");
         var request = new HttpRequestMessage(method, $"{_endpoint}{path}");
@@ -50,7 +50,7 @@ public class KubernetesApiService
         // Console.WriteLine(json);
 
         var bytes = await result.Content.ReadAsByteArrayAsync();
-        var obj = JsonSerializer.Deserialize<T>(bytes, _serializerOptions);
+        var obj = JsonSerializer.Deserialize<ResponseT>(bytes, _serializerOptions);
         return obj!;
     }
 

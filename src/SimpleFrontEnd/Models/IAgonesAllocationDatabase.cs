@@ -1,5 +1,4 @@
-﻿
-namespace SimpleFrontEnd.Data;
+﻿namespace SimpleFrontEnd.Models;
 
 public interface IAgonesAllocationDatabase
 {

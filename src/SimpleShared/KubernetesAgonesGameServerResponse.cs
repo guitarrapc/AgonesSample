@@ -1,27 +1,10 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace SimpleShared;
 
-namespace SimpleFrontEnd.Data;
-
-// ref: https://agones.dev/site/docs/reference/gameserver/
-// '{"apiVersion":"agones.dev/v1","kind":"GameServer","spec":{"selectors":["matchLabels":{"agones.dev/fleet":"FLEETNAME"}]}}'
-
-public class GameServerListResponse
-{
-    public string apiVersion { get; set; } = "agones.dev/v1";
-    public GameServerResponse[]? items { get; set; }
-    public string kind { get; set; } = "GameServerList";
-    public Metadata? metadata { get; set; }
-
-    public class Metadata
-    {
-        public string? _continue { get; set; }
-        public string? resourceVersion { get; set; }
-        public string? selfLink { get; set; }
-    }
-}
-
-
-public class GameServerResponse
+/// <summary>
+/// Agones GameServer Response from Kubernetes.
+/// ref: https://agones.dev/site/docs/reference/gameserver/
+/// </summary>
+public class KubernetesAgonesGameServerResponse
 {
     public string apiVersion { get; set; } = "agones.dev/v1";
     public string kind { get; set; } = "GameServer";
