@@ -18,11 +18,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
-
-      # HACK: dotnet-format broken on dotnet sdk 6.0.200. Use global tool instead to avoid issue.
-      # https://github.com/dotnet/format/issues/1433
-      - run: dotnet tool install -g dotnet-format --version "6.*" --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet6/nuget/v3/index.json
+          dotnet-version: 6.0.100
 
       # dotnet list
       - name: Obtain csproj to lint
