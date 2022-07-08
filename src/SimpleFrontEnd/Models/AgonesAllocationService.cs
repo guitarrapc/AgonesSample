@@ -50,6 +50,7 @@ public class AgonesAllocationService
 
         var host = response.address;
         var port = response.ports!.First().port;
+
         AddAllocationEntry($"{host}:{port}");
         return $"http://{host}:{port}";
     }
@@ -75,6 +76,7 @@ public class AgonesAllocationService
 
         var host = response.status!.address;
         var port = response.status!.ports!.First().port;
+
         AddAllocationEntry($"{host}:{port}");
         return $"http://{host}:{port}";
     }
@@ -90,6 +92,7 @@ public class AgonesAllocationService
         var uri = new Uri(backendserverAddress);
         var host = uri.Host;
         var port = uri.Port;
+
         AddAllocationEntry($"{host}:{port}");
         return $"http://{host}:{port}";
     }
