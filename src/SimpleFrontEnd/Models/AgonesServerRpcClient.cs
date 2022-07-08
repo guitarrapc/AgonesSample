@@ -77,6 +77,7 @@ public class BackendServerRpcClient
         using var channel = GrpcChannel.ForAddress(address);
         var service = MagicOnionClient.Create<IAgonesService>(channel);
         var result = await service.ShutdownAsync();
+
         return new AgonesSdkServiceResponse
         {
             Result = result.Success ? "Success" : "Failed",

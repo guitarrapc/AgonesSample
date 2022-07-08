@@ -8,6 +8,8 @@ public partial class AgonesService : ComponentBase
 {
     [Inject]
     public Models.BackendServerRpcClient AgonesServerService { get; set; } = default!;
+    [Inject]
+    public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
 
     private string _address = "";
     public string Result { get; set; } = "";
@@ -22,7 +24,6 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
             var result = await AgonesServerService.AllocateCrdAsync(_address);
             Result = result.Result;
             Detail = result.Detail;
@@ -38,7 +39,6 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
             var result = await AgonesServerService.ConnectAsync(_address);
             Result = result.Result;
             Detail = result.Detail;
@@ -54,8 +54,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
-            var result = await AgonesServerService.ReadyAsync(_address);
+            var result = await AgonesServerService.ReadyAsync("http://" + _address);
             Result = result.Result;
             Detail = result.Detail;
         }
@@ -86,8 +85,8 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
             var result = await AgonesServerService.ShutdownAsync(_address);
+            AgonesAllocationService.RemoveAllocationEntry(_address);
             Result = result.Result;
             Detail = result.Detail;
         }

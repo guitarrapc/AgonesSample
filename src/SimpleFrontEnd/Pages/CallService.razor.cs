@@ -17,12 +17,14 @@ public partial class CallService : ComponentBase
 
     private async Task CallServiceAsync()
     {
-        var address = AgonesAllocationService.GetAllocationEntryRandomOrDefault();
-        if (address is null)
-            return;
+        if (_address is null)
+        {
+            _address = AgonesAllocationService.GetAllocationEntryRandomOrDefault();
+            if (_address is null)
+                throw new ArgumentNullException(nameof(_address));
+        }
 
-        _address = address;
-        using var channel = GrpcChannel.ForAddress(address);
+        using var channel = GrpcChannel.ForAddress(_address);
         var echoService = MagicOnionClient.Create<IEchoService>(channel);
         Result = await echoService.EchoAsync(Input);
     }

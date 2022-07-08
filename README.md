@@ -41,12 +41,12 @@ Run docker-compose to emulate AgonesSDK. Use [examples/docker/compose.yaml](http
 ```yaml
 services:
   frontend:
-    image: agonessample-simplefrontend:v0.9.0
+    image: agonessample-simplefrontend:v1.0.0
     ports:
       - 5104:80
 
   server:
-    image: agonessample-simpleserver:v0.9.0
+    image: agonessample-simpleserver:v1.0.0
     ports:
       - 5157:80
 ```
