@@ -11,7 +11,6 @@ public partial class AgonesService : ComponentBase
     [Inject]
     public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
 
-    private string _address = "";
     public string Result { get; set; } = "";
     public string Detail { get; set; } = "";
     public string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
@@ -24,7 +23,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            var result = await AgonesServerService.AllocateCrdAsync("http://" + _address);
+            var result = await AgonesServerService.AllocateCrdAsync("http://" + Input);
             Result = result.Result;
             Detail = result.Detail;
         }
@@ -39,7 +38,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            var result = await AgonesServerService.ConnectAsync("http://" + _address);
+            var result = await AgonesServerService.ConnectAsync("http://" + Input);
             Result = result.Result;
             Detail = result.Detail;
         }
@@ -54,7 +53,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            var result = await AgonesServerService.ReadyAsync("http://" + _address);
+            var result = await AgonesServerService.ReadyAsync("http://" + Input);
             Result = result.Result;
             Detail = result.Detail;
         }
@@ -69,7 +68,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            var result = await AgonesServerService.GetGameServerAsync("http://" + _address);
+            var result = await AgonesServerService.GetGameServerAsync("http://" + Input);
             Result = result.Result;
             Detail = result.Detail;
         }
@@ -84,8 +83,8 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            var result = await AgonesServerService.ShutdownAsync("http://" + _address);
-            AgonesAllocationService.RemoveAllocationEntry(_address);
+            var result = await AgonesServerService.ShutdownAsync("http://" + Input);
+            AgonesAllocationService.RemoveAllocationEntry(Input);
             Result = result.Result;
             Detail = result.Detail;
         }
