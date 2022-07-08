@@ -24,7 +24,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            var result = await AgonesServerService.AllocateCrdAsync(_address);
+            var result = await AgonesServerService.AllocateCrdAsync("http://" + _address);
             Result = result.Result;
             Detail = result.Detail;
         }
@@ -39,7 +39,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            var result = await AgonesServerService.ConnectAsync(_address);
+            var result = await AgonesServerService.ConnectAsync("http://" + _address);
             Result = result.Result;
             Detail = result.Detail;
         }
@@ -69,8 +69,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
-            var result = await AgonesServerService.GetGameServerAsync(_address);
+            var result = await AgonesServerService.GetGameServerAsync("http://" + _address);
             Result = result.Result;
             Detail = result.Detail;
         }
@@ -85,7 +84,7 @@ public partial class AgonesService : ComponentBase
     {
         try
         {
-            var result = await AgonesServerService.ShutdownAsync(_address);
+            var result = await AgonesServerService.ShutdownAsync("http://" + _address);
             AgonesAllocationService.RemoveAllocationEntry(_address);
             Result = result.Result;
             Detail = result.Detail;
