@@ -5,10 +5,10 @@
 
 # Prerequisites
 
-Install Agones, before running on Kubernetes.
+Install Agones. Options set Allocator non-TLS.
 
 ```shell
-helm upgrade --install agones agones/agones --version 1.19.0 --namespace agones-system --create-namespace
+helm upgrade --install agones agones/agones --version 1.22.0 --namespace agones-system --create-namespace --set agones.allocator.service.http.port=8443 --set agones.allocator.service.grpc.enabled=false --set agones.allocator.disableTLS=true
 ```
 
 # Install
