@@ -2,10 +2,12 @@
 <h3>Allocate</h3>
 
 <p>Server (address:port): <input type="text" @bind="Input" /></p>
-<p>Allocate API: <button @onclick="() => AllocateAsync()">Submit</button> </p>
+<p>AllocatorApi: <button @onclick="() => AllocationApiAsync()">Submit</button> </p>
+<p>AllocatorBackend: <button @onclick="() => AllocationBackendAsync()">Submit</button> </p>
+<p>AllocatorCrd: <button @onclick="() => AllocationCrdAsync()">Submit</button> </p>
 <p>Manual Allocate: <button @onclick="() => ManualAllocateAsync()">Submit</button> </p>
 <hr>
-<p>Test Kubernetes Api: <button @onclick="() => TestKubernetesApiAsync()">Submit</button> </p>
+<p>Test Kubernetes Api: <button @onclick="() => GetKubernetesApiAsync()">Submit</button> </p>
 <p>Admin Ops: <button @onclick="() => ClearAsync()">Clear</button> <button @onclick="() => ListAsync()">List</button></p>
 <hr>
 <p>Result: @Result</p>

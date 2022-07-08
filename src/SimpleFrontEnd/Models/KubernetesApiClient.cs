@@ -4,9 +4,9 @@ using SimpleShared;
 
 namespace SimpleFrontEnd.Models;
 
-public class KubernetesApiService
+public class KubernetesApiClient
 {
-    private readonly ILogger<KubernetesApiService> _logger;
+    private readonly ILogger<KubernetesApiClient> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly string _endpoint;
     private readonly string _accessToken;
@@ -16,7 +16,7 @@ public class KubernetesApiService
         WriteIndented = true,
     };
 
-    public KubernetesApiService(IHttpClientFactory httpClientFactory, ILogger<KubernetesApiService> logger)
+    public KubernetesApiClient(IHttpClientFactory httpClientFactory, ILogger<KubernetesApiClient> logger)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;

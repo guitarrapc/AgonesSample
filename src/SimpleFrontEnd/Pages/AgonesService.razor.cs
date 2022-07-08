@@ -7,7 +7,7 @@ namespace SimpleFrontEnd.Pages;
 public partial class AgonesService : ComponentBase
 {
     [Inject]
-    public Models.AgonesServerRpcService AgonesServerService { get; set; } = default!;
+    public Models.BackendServerRpcClient AgonesServerService { get; set; } = default!;
 
     private string _address = "";
     public string Result { get; set; } = "";
@@ -23,7 +23,7 @@ public partial class AgonesService : ComponentBase
         try
         {
             _address = Input.StartsWith("http://") ? Input : $"http://{Input}";
-            var result = await AgonesServerService.AllocateAsync(_address);
+            var result = await AgonesServerService.AllocateCrdAsync(_address);
             Result = result.Result;
             Detail = result.Detail;
         }

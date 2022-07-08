@@ -11,15 +11,17 @@ public partial class Allocate : ComponentBase
     [Inject]
     public IHttpClientFactory HttpClientFactory { get; set; } = default!;
 
-    public string? Result { get; set; }
-    public string[] List { get; set; } = Array.Empty<string>();
-    public string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
+    private string? Result { get; set; }
+    private string[] List { get; set; } = Array.Empty<string>();
+    private string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
         ? DockerServiceProvider.Current.IsRunningOnDocker
             ? "server:80" // docker
             : "localhost:5157" // local machine
         : ""; // kubernetes
+    private const string Namespace = "default";
+    private const string FleetName = "simple-server";
 
-    private async Task TestKubernetesApiAsync()
+    private async Task GetKubernetesApiAsync()
     {
         var apiResult = await AgonesAllocationService.GetKubernetesApiAsync();
         Result = apiResult;
@@ -27,7 +29,24 @@ public partial class Allocate : ComponentBase
         StateHasChanged();
     }
 
-    private async Task AllocateAsync()
+    private async Task AllocationApiAsync()
+    {
+        try
+        {
+            var host = await AgonesAllocationService.SendAllocationApiAsync($"http://{Input}", Namespace, FleetName);
+            Result = host;
+            List = AgonesAllocationService.GetAllAllocationEntries();
+        }
+        catch (Exception ex)
+        {
+            Result = ex.GetType().FullName + " " + ex.Message + $"{(ex.StackTrace != null ? " " + ex.StackTrace : "")}";
+            List = Array.Empty<string>();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task AllocationBackendAsync()
     {
         if (string.IsNullOrEmpty(Input))
         {
@@ -38,13 +57,38 @@ public partial class Allocate : ComponentBase
 
         try
         {
-            var host = await AgonesAllocationService.SendAllocationAsync("default", "simple-server", $"http://{Input}");
+            var host = await AgonesAllocationService.SendAllocationBackendAsync($"http://{Input}");
             Result = host;
             List = AgonesAllocationService.GetAllAllocationEntries();
         }
         catch (Exception ex)
         {
-            Result = ex.Message + $"{(ex.StackTrace != null ? " " + ex.StackTrace : "")}";
+            Result = ex.GetType().FullName + " " + ex.Message + $"{(ex.StackTrace != null ? " " + ex.StackTrace : "")}";
+            List = Array.Empty<string>();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task AllocationCrdAsync()
+    {
+        if (!KubernetesServiceProvider.Current.IsRunningOnKubernetes)
+        {
+            Result = "Not running on Kubernetes. Allocate via CRD is not permitted.";
+            List = Array.Empty<string>();
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            var host = await AgonesAllocationService.SendAllocationCrdAsync(Namespace, FleetName);
+            Result = host;
+            List = AgonesAllocationService.GetAllAllocationEntries();
+        }
+        catch (Exception ex)
+        {
+            Result = ex.GetType().FullName + " " + ex.Message + $"{(ex.StackTrace != null ? " " + ex.StackTrace : "")}";
             List = Array.Empty<string>();
         }
 

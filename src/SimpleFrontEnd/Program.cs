@@ -11,17 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
-builder.Services.AddSingleton<IAgonesAllocationDatabase, InmemoryAgonesAllocationDatabase>();
-builder.Services.AddSingleton<KubernetesApiService>();
-builder.Services.AddSingleton<AgonesAllocationService>();
-builder.Services.AddSingleton<AgonesGameServerService>();
-builder.Services.AddSingleton<AgonesServerRpcService>();
 
-builder.Services.AddHttpClient("kubernetes-api")
-    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
-    {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
-    });
+// Add Application services to the container.
+builder.RegisterApplicationServices();
 
 var app = builder.Build();
 
@@ -31,7 +23,6 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
 }
 
-
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -40,3 +31,29 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+
+
+public static class StartupExtentions
+{
+    public static void RegisterApplicationServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<IAgonesAllocationDatabase, InmemoryAgonesAllocationDatabase>();
+        builder.Services.AddSingleton<AgonesAllocatorApiClient>();
+        builder.Services.AddSingleton<BackendServerRpcClient>();
+        builder.Services.AddSingleton<KubernetesApiClient>();
+        builder.Services.AddSingleton<AgonesAllocationService>();
+        builder.Services.AddSingleton<AgonesGameServerService>();
+
+        builder.Services.AddHttpClient("kubernetes-api")
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
+            });
+
+        builder.Services.AddHttpClient("agonesallocator-api")
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
+            });
+    }
+}

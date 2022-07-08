@@ -7,10 +7,10 @@ public class AgonesGameServerService
 {
     private readonly IAgonesAllocationDatabase _database;
     private readonly ILogger<AgonesGameServerService> _logger;
-    private readonly AgonesServerRpcService _agonesServerRpcService;
-    private readonly KubernetesApiService _kubernetesApi;
+    private readonly BackendServerRpcClient _agonesServerRpcService;
+    private readonly KubernetesApiClient _kubernetesApi;
 
-    public AgonesGameServerService(IAgonesAllocationDatabase database, AgonesServerRpcService agonesRpcService, KubernetesApiService kubernetesApi, ILogger<AgonesGameServerService> logger)
+    public AgonesGameServerService(IAgonesAllocationDatabase database, BackendServerRpcClient agonesRpcService, KubernetesApiClient kubernetesApi, ILogger<AgonesGameServerService> logger)
     {
         _database = database;
         _agonesServerRpcService = agonesRpcService;

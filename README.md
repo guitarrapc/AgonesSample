@@ -16,13 +16,13 @@ helm upgrade --install agones agones/agones --version 1.19.0 --namespace agones-
 Try on Kubernetes. Use [examples/k8s/deployment.yaml](https://github.com/guitarrapc/AgonesSample/blob/main/examples/k8s/deployment.yaml).
 
 ```shell
-kubectl apply -f ./k8s/deployment.yaml
+kubectl apply -f ./examples/k8s/deployment.yaml
 ```
 
 To allocate Gameserver, use [examples/k8s/allocation.yaml](https://github.com/guitarrapc/AgonesSample/blob/main/examples/k8s/allocation.yaml).
 
 ```shell
-kubectl apply -f ./k8s/allocation.yaml
+kubectl apply -f ./examples/k8s/allocation.yaml
 ```
 
 # Clean up

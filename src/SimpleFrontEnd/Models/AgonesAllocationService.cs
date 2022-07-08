@@ -5,16 +5,18 @@ namespace SimpleFrontEnd.Models;
 
 public class AgonesAllocationService
 {
-    private readonly ILogger<AgonesAllocationService> _logger;
-    private readonly KubernetesApiService _kubernetesApi;
+    private readonly BackendServerRpcClient _agonesServerRpcClient;
+    private readonly AgonesAllocatorApiClient _agonesAllocatorApiClient;
     private readonly IAgonesAllocationDatabase _database;
-    private readonly AgonesServerRpcService _agonesServerRpcService;
+    private readonly KubernetesApiClient _kubernetesClient;
+    private readonly ILogger<AgonesAllocationService> _logger;
 
-    public AgonesAllocationService(IAgonesAllocationDatabase database, AgonesServerRpcService agonesRpcService, KubernetesApiService kubernetesApi, ILogger<AgonesAllocationService> logger)
+    public AgonesAllocationService(IAgonesAllocationDatabase database, BackendServerRpcClient agonesRpcClient, KubernetesApiClient kubernetesClient, AgonesAllocatorApiClient agonesAllocatorApiClient, ILogger<AgonesAllocationService> logger)
     {
         _database = database;
-        _agonesServerRpcService = agonesRpcService;
-        _kubernetesApi = kubernetesApi;
+        _agonesServerRpcClient = agonesRpcClient;
+        _kubernetesClient = kubernetesClient;
+        _agonesAllocatorApiClient = agonesAllocatorApiClient;
         _logger = logger;
     }
 
@@ -26,7 +28,7 @@ public class AgonesAllocationService
     {
         if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
         {
-            return await _kubernetesApi.SendKubernetesApiAsync("/api", HttpMethod.Get);
+            return await _kubernetesClient.SendKubernetesApiAsync("/api", HttpMethod.Get);
         }
         else
         {
@@ -34,31 +36,37 @@ public class AgonesAllocationService
         }
     }
 
-    public async Task<string> SendAllocationAsync(string @namespace, string fleetName, string address)
+    /// <summary>
+    /// Send Allocation request to Agones through Agones Allocation API.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<string> SendAllocationApiAsync(string endpoint, string @namespace, string fleetName)
     {
-        if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
-        {
-            return await SendAllocationKubernetesAsync(@namespace, fleetName);
-        }
-        else
-        {
-            return await SendAllocationAgonesAsync(address);
-        }
+        var body = AgonesAllocationApiRequest.CreateRequest(@namespace, fleetName);
+        var response = await _agonesAllocatorApiClient.SendAllocationApiAsync(endpoint, body);
+
+        // debug output response JSON
+        _logger.LogDebug(JsonSerializer.Serialize(response));
+
+        var host = response.address;
+        var port = response.ports!.First().port;
+        AddAllocationEntry($"{host}:{port}");
+        return $"http://{host}:{port}";
     }
 
     /// <summary>
-    /// Send Allocation request to Agones.
+    /// Send Allocation request to Agones through Kubernetes Custom Resource Definition.
     /// </summary>
     /// <returns></returns>
-    private async Task<string> SendAllocationKubernetesAsync(string @namespace, string fleetName)
+    public async Task<string> SendAllocationCrdAsync(string @namespace, string fleetName)
     {
         var body = KubernetesAgonesGameServerAllocationRequest.CreateRequest("allocation", fleetName);
-        var json = JsonSerializer.Serialize(body);
-        _logger.LogDebug(json);
 
         // ref: https://agones.dev/site/docs/guides/access-api/
+        var json = JsonSerializer.Serialize(body);
+        _logger.LogDebug(json);
         var content = new StringContent(json);
-        var response = await _kubernetesApi.SendKubernetesApiAsync<KubernetesAgonesGameServerAllocationResponse>($"/apis/allocation.agones.dev/v1/namespaces/{@namespace}/gameserverallocations", HttpMethod.Post, content);
+        var response = await _kubernetesClient.SendKubernetesApiAsync<KubernetesAgonesGameServerAllocationResponse>($"/apis/allocation.agones.dev/v1/namespaces/{@namespace}/gameserverallocations", HttpMethod.Post, content);
 
         if (response == null) throw new ArgumentNullException(nameof(response));
 
@@ -72,14 +80,14 @@ public class AgonesAllocationService
     }
 
     /// <summary>
-    /// Send Allocation request to Agones.
+    /// Send Allocation request to Agones through Backend.
     /// </summary>
     /// <returns></returns>
-    private async Task<string> SendAllocationAgonesAsync(string address)
+    public async Task<string> SendAllocationBackendAsync(string backendserverAddress)
     {
-        var response = await _agonesServerRpcService.AllocateAsync(address);
+        var response = await _agonesServerRpcClient.AllocateCrdAsync(backendserverAddress);
 
-        var uri = new Uri(address);
+        var uri = new Uri(backendserverAddress);
         var host = uri.Host;
         var port = uri.Port;
         AddAllocationEntry($"{host}:{port}");

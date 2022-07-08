@@ -10,18 +10,18 @@ public class AgonesSdkServiceResponse
     public string Detail { get; set; } = default!;
 }
 
-public class AgonesServerRpcService
+public class BackendServerRpcClient
 {
-    private readonly ILogger<AgonesServerRpcService> _logger;
+    private readonly ILogger<BackendServerRpcClient> _logger;
 
-    public AgonesServerRpcService(ILogger<AgonesServerRpcService> logger)
+    public BackendServerRpcClient(ILogger<BackendServerRpcClient> logger)
     {
         _logger = logger;
     }
 
-    public async Task<AgonesSdkServiceResponse> AllocateAsync(string address)
+    public async Task<AgonesSdkServiceResponse> AllocateCrdAsync(string address)
     {
-        _logger.LogInformation($"Sending {AllocateAsync} to {address}.");
+        _logger.LogInformation($"Sending {AllocateCrdAsync} to {address}.");
         using var channel = GrpcChannel.ForAddress(address);
         var service = MagicOnionClient.Create<IAgonesService>(channel);
         var result = await service.AllocateAsync();
