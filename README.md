@@ -30,7 +30,8 @@ kubectl apply -f ./examples/k8s/allocation.yaml
 Clean kubernetes resources.
 
 ```shell
-kubectl delete -f ./k8s/deployment.yaml
+kubectl delete -f ./examples/k8s/deployment.yaml
+helm uninstall agones -n agones-system
 ```
 
 # Note
