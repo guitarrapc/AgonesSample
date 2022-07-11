@@ -86,9 +86,9 @@ public class AgonesAllocationApiResponse
     public string? nodeName { get; init; }
 
     // for error response
-    public string error { get; set; }
+    public string? error { get; set; }
     public int code { get; set; }
-    public string message { get; set; }
+    public string? message { get; set; }
 
     public record PortType
     {
