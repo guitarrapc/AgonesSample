@@ -8,7 +8,9 @@
 Install Agones. Options set Allocator non-TLS.
 
 ```shell
-helm upgrade --install agones agones/agones --version 1.22.0 --namespace agones-system --create-namespace --set agones.allocator.service.http.port=8443 --set agones.allocator.service.grpc.enabled=false --set agones.allocator.disableTLS=true
+helm repo add agones https://agones.dev/chart/stable
+helm repo update
+helm upgrade --install agones agones/agones --version 1.23.0 --namespace agones-system --create-namespace --set agones.allocator.service.http.port=8443 --set agones.allocator.service.grpc.enabled=false --set agones.allocator.disableTLS=true
 ```
 
 # Install
@@ -19,11 +21,17 @@ Try on Kubernetes. Use [examples/k8s/deployment.yaml](https://github.com/guitarr
 kubectl apply -f ./examples/k8s/deployment.yaml
 ```
 
-To allocate Gameserver, use [examples/k8s/allocation.yaml](https://github.com/guitarrapc/AgonesSample/blob/main/examples/k8s/allocation.yaml).
+Now server and up and running on http://localhost
+
+To allocate Gameserver, you have 2 way.
+
+1. Use allocate through Kubernetes API. Use [examples/k8s/allocation.yaml](https://github.com/guitarrapc/AgonesSample/blob/main/examples/k8s/allocation.yaml).
 
 ```shell
 kubectl apply -f ./examples/k8s/allocation.yaml
 ```
+
+2. Use allocation API.
 
 # Clean up
 
