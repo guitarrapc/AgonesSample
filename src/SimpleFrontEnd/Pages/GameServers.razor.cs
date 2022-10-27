@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SimpleFrontEnd.Models;
-using SimpleShared;
 
 namespace SimpleFrontEnd.Pages;
 
@@ -67,12 +66,13 @@ public partial class GameServers : ComponentBase
 
 public class GameServerViewModel
 {
-    public string? Namespace { get; set; }
-    public string? Name { get; set; }
-    public string? Status { get; set; }
-    public string? Address { get; set; }
-    public int Port { get; set; }
-    public string? Node { get; set; }
+    public string? Namespace { get; init; }
+    public string? Name { get; init; }
+    public string? Status { get; init; }
+    public string? Endpoint => Address + ":" + Port;
+    public string? Address { get; init; }
+    public int Port { get; init; }
+    public string? Node { get; init; }
     // 30s, 15m, 3h30m, 5d
-    public string? Age { get; set; }
+    public string? Age { get; init; }
 }

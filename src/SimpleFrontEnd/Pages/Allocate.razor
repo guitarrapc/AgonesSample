@@ -1,19 +1,48 @@
 ﻿@page "/allocate"
 <h3>Allocate</h3>
 
-<p>Server (address:port): <input type="text" @bind="Input" /></p>
-<p>AllocatorApi: <button @onclick="() => AllocationApiAsync()">Submit</button> </p>
-<p>AllocatorBackend: <button @onclick="() => AllocationBackendAsync()">Submit</button> </p>
-<p>AllocatorCrd: <button @onclick="() => AllocationCrdAsync()">Submit</button> </p>
-<p>Manual Allocate: <button @onclick="() => ManualAllocateAsync()">Submit</button> </p>
+<div class="flex-column">
+    <div class="nav-item px-3">
+        <input type="text" @bind="Input" />
+        <div>
+            <p><span class="oi oi-text" aria-hidden="true"></span> Server (address:port)</p>
+        </div>
+    </div>
+    <div class="nav-item px-3">
+        <button @onclick="() => AllocationApiAsync()"><span class="oi oi-check" aria-hidden="true"></span> Allocator Api</button>        
+        <p>Use Agones Allocation API to allocate.</p>
+    </div>
+    <div class="nav-item px-3">
+        <button @onclick="() => AllocationBackendAsync()"><span class="oi oi-check" aria-hidden="true"></span> Allocator Backend</button>
+        <p>Use Agones CRD to allocate through Kubernetes API. (from this Backend)</p>
+    </div>
+    <div class="nav-item px-3">
+        <button @onclick="() => AllocationCrdAsync()"><span class="oi oi-check" aria-hidden="true"></span> Allocator Crd</button>
+        <p>Use Agones CRD to allocate through Kubernetes API. (from this Frontend)</p>
+    </div>
+    <div class="nav-item px-3">
+        <button @onclick="() => ManualAllocateAsync()"><span class="oi oi-check" aria-hidden="true"></span> Add Allocate Entry</button>
+        <p>Not allocate. Just add server entry to database.</p>
+    </div>
+    <hr>
+    <div class="nav-item px-3">
+        <button @onclick="() => GetKubernetesApiAsync()"><span class="oi oi-home" aria-hidden="true"></span> Test Kubernetes Api</button>
+        <p>Run Kubernetes API.</p>
+    </div>
+    <hr>
+    <div class="nav-item px-3">
+        <span class="oi oi-beaker" aria-hidden="true"></span> Admin Ops
+        <button @onclick="() => ClearAsync()">Clear</button>
+        <button @onclick="() => ListAsync()">List</button>
+    </div>
+</div>
+
 <hr>
-<p>Test Kubernetes Api: <button @onclick="() => GetKubernetesApiAsync()">Submit</button> </p>
-<p>Admin Ops: <button @onclick="() => ClearAsync()">Clear</button> <button @onclick="() => ListAsync()">List</button></p>
-<hr>
+
 <p>Result: @Result</p>
 <ul>
-@foreach (var item in List)
-{
-    <li>@item</li>
-}
+    @foreach (var item in List)
+    {
+        <li>@item</li>
+    }
 </ul>
