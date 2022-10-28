@@ -54,12 +54,16 @@ public partial class GameServers : ComponentBase
             var endpoint = input.Trim();
             var result = await AgonesServerService.ShutdownAsync("http://" + endpoint);
             AgonesAllocationService.RemoveAllocationEntry(endpoint);
-            Result = result.Result;
+            Result = result.Detail;
         }
         catch (Exception ex)
         {
             Result = ex.Message;
         }
+
+        // refresh page
+        await GetGameServersAsync();
+        StateHasChanged();
     }
 
     private string ConvertToAge(TimeSpan timeSpan)
