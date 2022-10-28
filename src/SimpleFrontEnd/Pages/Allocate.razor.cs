@@ -17,7 +17,7 @@ public partial class Allocate : ComponentBase
         ? DockerServiceProvider.Current.IsRunningOnDocker
             ? "server:80" // docker
             : "localhost:5157" // local machine
-        : ""; // kubernetes
+        : "agones-allocator.agones-system.svc.cluster.local:8443"; // kubernetes
     private const string Namespace = "default";
     private const string FleetName = "simple-backend";
 

@@ -10,15 +10,15 @@
     </div>
     <div class="nav-item px-3">
         <button @onclick="() => AllocationApiAsync()"><span class="oi oi-check" aria-hidden="true"></span> Allocator Api</button>        
-        <p>Use Agones Allocation API to allocate.</p>
+        <p>Use Agones Allocation API to allocate. Server Endpoint should be agones-allocator.agones-system.svc.cluster.local:8443 </p>
     </div>
     <div class="nav-item px-3">
         <button @onclick="() => AllocationBackendAsync()"><span class="oi oi-check" aria-hidden="true"></span> Allocator Backend</button>
-        <p>Use Agones CRD to allocate through Kubernetes API. (from this Backend)</p>
+        <p>Use Agones CRD to allocate through Kubernetes API. Server Endpoint should be GameServer you want allocate.</p>
     </div>
     <div class="nav-item px-3">
         <button @onclick="() => AllocationCrdAsync()"><span class="oi oi-check" aria-hidden="true"></span> Allocator Crd</button>
-        <p>Use Agones CRD to allocate through Kubernetes API. (from this Frontend)</p>
+        <p>Use Agones CRD to allocate through Kubernetes API. Server Endpoint will ignore.</p>
     </div>
     <div class="nav-item px-3">
         <button @onclick="() => ManualAllocateAsync()"><span class="oi oi-check" aria-hidden="true"></span> Add Allocate Entry</button>

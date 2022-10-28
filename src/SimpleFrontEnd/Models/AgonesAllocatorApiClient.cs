@@ -24,9 +24,10 @@ public class AgonesAllocatorApiClient
     /// <summary>
     /// Send Request to Kubernetes API and get T result.
     /// </summary>
-    /// <param name="path"></param>
-    /// <param name="method"></param>
+    /// <param name="endpoint"></param>
+    /// <param name="body"></param>
     /// <returns></returns>
+    /// <exception cref="HttpRequestException"></exception>
     public async Task<AgonesAllocationApiResponse> SendAllocationApiAsync(string endpoint, AgonesAllocationApiRequest body)
     {
         var requestJson = JsonSerializer.Serialize(body, _serializerOptions);
@@ -34,16 +35,19 @@ public class AgonesAllocatorApiClient
         var content = new StringContent(requestJson);
 
         var httpClient = _httpClientFactory.CreateClient("agonesallocator-api");
+        // should be `http://agones-allocator.agones-system.svc.cluster.local:8443/gameserverallocation`
         var request = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/gameserverallocation");
         request.Headers.TryAddWithoutValidation("Accept", "application/json");
-        // agones can not accept content-type with media-type. 
+
+        // HACK:agones can not accept content-type with media-type. 
         // re-apply request content-type to remove `media-type: utf8` from contet-type.
         // see: https://github.com/googleforgames/agones/blob/0e244fddf938e88dc5156ac2c7339adbb230daee/vendor/k8s.io/apimachinery/pkg/runtime/codec.go#L218-L220
         content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         request.Content = content;
-        var res = await httpClient.SendAsync(request);
-        //result.EnsureSuccessStatusCode();
 
+        // Send request
+        var res = await httpClient.SendAsync(request);
+        // res.EnsureSuccessStatusCode();
 
         var bytes = await res.Content.ReadAsByteArrayAsync();
         var response = JsonSerializer.Deserialize<AgonesAllocationApiResponse>(bytes, _serializerOptions);

@@ -33,6 +33,10 @@ kubectl apply -f ./examples/k8s/allocation.yaml
 
 2. Use allocation API.
 
+```shell
+http://localhost:5104/allocate
+```
+
 # Clean up
 
 Clean kubernetes resources.
