@@ -6,16 +6,16 @@ EXPOSE 5012
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["src/SimpleApi/SimpleApi.csproj", "src/SimpleApi/"]
-RUN dotnet restore "src/SimpleApi/SimpleApi.csproj"
+COPY ["src/SimpleBackendApi/SimpleBackendApi.csproj", "src/SimpleBackendApi/"]
+RUN dotnet restore "src/SimpleBackendApi/SimpleBackendApi.csproj"
 COPY . .
-WORKDIR "/src/src/SimpleApi"
-RUN dotnet build "SimpleApi.csproj" -c Release -o /app/build
+WORKDIR "/src/src/SimpleBackendApi"
+RUN dotnet build "SimpleBackendApi.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "SimpleApi.csproj" -c Release -o /app/publish
+RUN dotnet publish "SimpleBackendApi.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SimpleApi.dll"]
+ENTRYPOINT ["dotnet", "SimpleBackendApi.dll"]

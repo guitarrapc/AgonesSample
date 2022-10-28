@@ -1,6 +1,6 @@
 # AgonesSample
 
-* [guitarrapc/agonessample-simpleserver](https://hub.docker.com/r/guitarrapc/agonessample-simpleserver) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleServer/Dockerfile)
+* [guitarrapc/agonessample-simplebackend](https://hub.docker.com/r/guitarrapc/agonessample-simplebackend) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleBackend/Dockerfile)
 * [guitarrapc/agonessample-simplefrontend](https://hub.docker.com/r/guitarrapc/agonessample-simplefrontend) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleFrontEnd/Dockerfile)
 
 # Prerequisites
@@ -54,7 +54,7 @@ services:
       - 5104:80
 
   server:
-    image: agonessample-simpleserver:v1.0.0
+    image: agonessample-simplebackend:v1.0.0
     ports:
       - 5157:80
 ```

@@ -19,7 +19,7 @@ public partial class Allocate : ComponentBase
             : "localhost:5157" // local machine
         : ""; // kubernetes
     private const string Namespace = "default";
-    private const string FleetName = "simple-server";
+    private const string FleetName = "simple-backend";
 
     private async Task GetKubernetesApiAsync()
     {

@@ -1,4 +1,4 @@
-﻿namespace SimpleApi;
+﻿namespace SimpleBackendApi;
 
 public class Program
 {

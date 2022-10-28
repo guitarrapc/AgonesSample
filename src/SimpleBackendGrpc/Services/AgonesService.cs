@@ -4,7 +4,7 @@ using MagicOnion;
 using MagicOnion.Server;
 using SimpleShared;
 
-namespace SimpleGrpc.Services;
+namespace SimpleBackendGrpc.Services;
 
 public class AgonesService : ServiceBase<IAgonesService>, IAgonesService
 {

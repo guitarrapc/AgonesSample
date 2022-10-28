@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleFrontEnd", "src\Simpl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleShared", "src\SimpleShared\SimpleShared.csproj", "{AFE581A0-304A-4EB4-8F32-27B2DA1BBA9A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleApi", "src\SimpleApi\SimpleApi.csproj", "{71B0C489-3DF8-4013-9103-FDCA0C4BF0D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleBackendApi", "src\SimpleBackendApi\SimpleBackendApi.csproj", "{71B0C489-3DF8-4013-9103-FDCA0C4BF0D4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleGrpc", "src\SimpleGrpc\SimpleGrpc.csproj", "{BA5DB645-32B0-4EA0-9145-BF3BB949651F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleBackendGrpc", "src\SimpleBackendGrpc\SimpleBackendGrpc.csproj", "{BA5DB645-32B0-4EA0-9145-BF3BB949651F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleServer", "src\SimpleServer\SimpleServer.csproj", "{F571A918-2F61-456D-ABC8-CD96ECC79968}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleBackend", "src\SimpleBackend\SimpleBackend.csproj", "{F571A918-2F61-456D-ABC8-CD96ECC79968}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

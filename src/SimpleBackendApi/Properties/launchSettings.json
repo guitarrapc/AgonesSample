@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "SimpleApi": {
+    "SimpleBackendApi": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",

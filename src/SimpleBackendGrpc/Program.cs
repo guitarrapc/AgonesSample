@@ -1,7 +1,7 @@
 ﻿using AgonesAspNetCore;
-using SimpleGrpc.Services;
+using SimpleBackendGrpc.Services;
 
-namespace SimpleGrpc;
+namespace SimpleBackendGrpc;
 
 public class Program
 {

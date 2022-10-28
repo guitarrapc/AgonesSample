@@ -9,9 +9,9 @@ services:
 
   server:
     build:
-      dockerfile: ./src/SimpleServer/Dockerfile
+      dockerfile: ./src/SimpleBackend/Dockerfile
       context: .
-    image: agonessample-simpleserver:dev
+    image: agonessample-simplebackend:dev
     ports:
       - 5157:5157
     restart: on-failure:1 # emulate new pod when shutdown

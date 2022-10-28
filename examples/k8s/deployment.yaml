@@ -17,7 +17,7 @@ spec:
       serviceAccountName: agones-rest
       containers:
         - name: simple-frontend
-          image: guitarrapc/agonessample-simplefrontend:v1.0.3
+          image: guitarrapc/agonessample-simplefrontend:v1.0.4
           imagePullPolicy: Always
           resources:
             limits:
@@ -31,14 +31,14 @@ spec:
 apiVersion: "agones.dev/v1"
 kind: Fleet
 metadata:
-  name: simple-server
+  name: simple-backend
   namespace: default
 spec:
   replicas: 2
   template:
     metadata:
       labels:
-        app: simple-server
+        app: simple-backend
     spec:
       ports:
         - name: default
@@ -47,13 +47,13 @@ spec:
       template:
         metadata:
           labels:
-            app: simple-server
+            app: simple-backend
           annotations:
-            kubectl.kubernetes.io/default-container: simple-server
+            kubectl.kubernetes.io/default-container: simple-backend
         spec:
           containers:
-            - name: simple-server
-              image: guitarrapc/agonessample-simpleserver:v1.0.3
+            - name: simple-backend
+              image: guitarrapc/agonessample-simplebackend:v1.0.4
               imagePullPolicy: Always
               resources:
                 requests:
@@ -70,10 +70,10 @@ spec:
 apiVersion: "autoscaling.agones.dev/v1"
 kind: FleetAutoscaler
 metadata:
-  name: simple-server-autoscaler
+  name: simple-backend-autoscaler
   namespace: default
 spec:
-  fleetName: simple-server
+  fleetName: simple-backend
   policy:
     type: Buffer
     buffer:
@@ -145,11 +145,11 @@ roleRef:
 apiVersion: v1
 kind: Service
 metadata:
-  name: simple-server
+  name: simple-backend
   namespace: default
 spec:
   selector:
-    app: simple-server
+    app: simple-backend
   ports:
     - port: 80
       targetPort: 5012
