@@ -6,9 +6,11 @@ namespace SimpleFrontEnd.Pages;
 public partial class GameServers : ComponentBase
 {
     [Inject]
-    public AgonesGameServerService AgonesGameServerService { get; set; } = default!;
+    public Models.BackendServerRpcClient AgonesServerService { get; set; } = default!;
     [Inject]
-    public IHttpClientFactory HttpClientFactory { get; set; } = default!;
+    public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
+    [Inject]
+    public AgonesGameServerService AgonesGameServerService { get; set; } = default!;
 
     public string? Result { get; set; }
     public GameServerViewModel[] List { get; set; } = Array.Empty<GameServerViewModel>();
@@ -41,6 +43,23 @@ public partial class GameServers : ComponentBase
         }
 
         StateHasChanged();
+    }
+
+    private async Task ShutdownAsync(string? input)
+    {
+        if (input is null) return;
+
+        try
+        {
+            var endpoint = input.Trim();
+            var result = await AgonesServerService.ShutdownAsync("http://" + endpoint);
+            AgonesAllocationService.RemoveAllocationEntry(endpoint);
+            Result = result.Result;
+        }
+        catch (Exception ex)
+        {
+            Result = ex.Message;
+        }
     }
 
     private string ConvertToAge(TimeSpan timeSpan)

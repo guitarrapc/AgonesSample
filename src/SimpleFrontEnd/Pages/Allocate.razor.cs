@@ -8,8 +8,6 @@ public partial class Allocate : ComponentBase
 {
     [Inject]
     public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
-    [Inject]
-    public IHttpClientFactory HttpClientFactory { get; set; } = default!;
 
     private string? Result { get; set; }
     private string? Response { get; set; }

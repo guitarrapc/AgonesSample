@@ -15,6 +15,7 @@
             <th>Port</th>
             <th>Node</th>
             <th>Age</th>
+            <th>Shutdown</th>
         </tr>
     </thead>
     <tbody>
@@ -29,7 +30,9 @@
             <td>@item.Port</td>
             <td>@item.Node</td>
             <td>@item.Age</td>
+            <td><button @onclick="@(() => ShutdownAsync(item.Endpoint))">Shutdown</button></td>
         </tr>
     }
     </tbody>
 </table>
+
