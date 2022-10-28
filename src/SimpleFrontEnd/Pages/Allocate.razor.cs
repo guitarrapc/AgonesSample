@@ -12,6 +12,7 @@ public partial class Allocate : ComponentBase
     public IHttpClientFactory HttpClientFactory { get; set; } = default!;
 
     private string? Result { get; set; }
+    private string? Response { get; set; }
     private string[] List { get; set; } = Array.Empty<string>();
     private string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
         ? DockerServiceProvider.Current.IsRunningOnDocker
@@ -33,9 +34,10 @@ public partial class Allocate : ComponentBase
     {
         try
         {
-            var host = await AgonesAllocationService.SendAllocationApiAsync($"http://{Input}", Namespace, FleetName);
-            Result = host;
+            var (endpoint, json) = await AgonesAllocationService.SendAllocationApiAsync($"http://{Input}", Namespace, FleetName);
+            Result = endpoint;
             List = AgonesAllocationService.GetAllAllocationEntries();
+            Response = json;
         }
         catch (Exception ex)
         {
@@ -57,9 +59,10 @@ public partial class Allocate : ComponentBase
 
         try
         {
-            var host = await AgonesAllocationService.SendAllocationBackendAsync($"http://{Input}");
-            Result = host;
+            var (endpoint,json) = await AgonesAllocationService.SendAllocationBackendAsync($"http://{Input}");
+            Result = endpoint;
             List = AgonesAllocationService.GetAllAllocationEntries();
+            Response = json;
         }
         catch (Exception ex)
         {
@@ -82,9 +85,10 @@ public partial class Allocate : ComponentBase
 
         try
         {
-            var host = await AgonesAllocationService.SendAllocationCrdAsync(Namespace, FleetName);
-            Result = host;
+            var (endpoint, json) = await AgonesAllocationService.SendAllocationCrdAsync(Namespace, FleetName);
+            Result = endpoint;
             List = AgonesAllocationService.GetAllAllocationEntries();
+            Response = json;
         }
         catch (Exception ex)
         {

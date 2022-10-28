@@ -40,26 +40,27 @@ public class AgonesAllocationService
     /// Send Allocation request to Agones through Agones Allocation API.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> SendAllocationApiAsync(string endpoint, string @namespace, string fleetName)
+    public async Task<(string endpoint, string response)> SendAllocationApiAsync(string endpoint, string @namespace, string fleetName)
     {
         var body = AgonesAllocationApiRequest.CreateRequest(@namespace, fleetName);
         var response = await _agonesAllocatorApiClient.SendAllocationApiAsync(endpoint, body);
 
         // debug output response JSON
-        _logger.LogDebug(JsonSerializer.Serialize(response));
+        var responseJson = JsonSerializer.Serialize(response);
+        _logger.LogDebug(responseJson);
 
         var host = response.address;
         var port = response.ports!.First().port;
 
         AddAllocationEntry($"{host}:{port}");
-        return $"http://{host}:{port}";
+        return ($"http://{host}:{port}", responseJson);
     }
 
     /// <summary>
     /// Send Allocation request to Agones through Kubernetes Custom Resource Definition.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> SendAllocationCrdAsync(string @namespace, string fleetName)
+    public async Task<(string endpoint, string response)> SendAllocationCrdAsync(string @namespace, string fleetName)
     {
         var body = KubernetesAgonesGameServerAllocationRequest.CreateRequest("allocation", fleetName);
 
@@ -72,29 +73,33 @@ public class AgonesAllocationService
         if (response == null) throw new ArgumentNullException(nameof(response));
 
         // debug output response JSON
-        _logger.LogDebug(JsonSerializer.Serialize(response));
+        var responseJson = JsonSerializer.Serialize(response);
+        _logger.LogDebug(responseJson);
 
         var host = response.status!.address;
         var port = response.status!.ports!.First().port;
 
         AddAllocationEntry($"{host}:{port}");
-        return $"http://{host}:{port}";
+        return ($"http://{host}:{port}", responseJson);
     }
 
     /// <summary>
     /// Send Allocation request to Agones through Backend.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> SendAllocationBackendAsync(string backendserverAddress)
+    public async Task<(string endpoint, string response)> SendAllocationBackendAsync(string backendserverAddress)
     {
         var response = await _agonesServerRpcClient.AllocateCrdAsync(backendserverAddress);
+
+        var responseJson = JsonSerializer.Serialize(response);
+        _logger.LogDebug(responseJson);
 
         var uri = new Uri(backendserverAddress);
         var host = uri.Host;
         var port = uri.Port;
 
         AddAllocationEntry($"{host}:{port}");
-        return $"http://{host}:{port}";
+        return ($"http://{host}:{port}", responseJson);
     }
 
     #region AllocationEntry
