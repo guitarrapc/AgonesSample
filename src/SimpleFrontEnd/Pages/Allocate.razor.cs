@@ -57,7 +57,7 @@ public partial class Allocate : ComponentBase
 
         try
         {
-            var (endpoint,json) = await AgonesAllocationService.SendAllocationBackendAsync($"http://{Input}");
+            var (endpoint, json) = await AgonesAllocationService.SendAllocationBackendAsync($"http://{Input}");
             Result = endpoint;
             List = AgonesAllocationService.GetAllAllocationEntries();
             Response = json;
