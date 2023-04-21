@@ -21,7 +21,7 @@ public class BackendServerRpcClient
 
     public async Task<AgonesSdkServiceResponse> AllocateCrdAsync(string address)
     {
-        _logger.LogInformation($"Sending {AllocateCrdAsync} to {address}.");
+        _logger.LogInformation($"Sending {nameof(AllocateCrdAsync)} to {address}.");
         using var channel = GrpcChannel.ForAddress(address);
         var service = MagicOnionClient.Create<IAgonesService>(channel);
         var result = await service.AllocateAsync();
@@ -34,7 +34,7 @@ public class BackendServerRpcClient
 
     public async Task<AgonesSdkServiceResponse> ConnectAsync(string address)
     {
-        _logger.LogInformation($"Sending {ConnectAsync} to {address}.");
+        _logger.LogInformation($"Sending {nameof(ConnectAsync)} to {address}.");
         using var channel = GrpcChannel.ForAddress(address);
         var service = MagicOnionClient.Create<IAgonesService>(channel);
         var result = await service.ConnectAsync();
@@ -47,7 +47,7 @@ public class BackendServerRpcClient
 
     public async Task<AgonesSdkServiceResponse> ReadyAsync(string address)
     {
-        _logger.LogInformation($"Sending {ReadyAsync} to {address}.");
+        _logger.LogInformation($"Sending {nameof(ReadyAsync)} to {address}.");
         using var channel = GrpcChannel.ForAddress(address);
         var service = MagicOnionClient.Create<IAgonesService>(channel);
         var result = await service.ReadyAsync();
@@ -60,7 +60,7 @@ public class BackendServerRpcClient
 
     public async Task<AgonesSdkServiceResponse> GetGameServerAsync(string address)
     {
-        _logger.LogInformation($"Sending {GetGameServerAsync} to {address}.");
+        _logger.LogInformation($"Sending {nameof(GetGameServerAsync)} to {address}.");
         using var channel = GrpcChannel.ForAddress(address);
         var service = MagicOnionClient.Create<IAgonesService>(channel);
         var result = await service.GetGameServerAsync();
@@ -73,7 +73,7 @@ public class BackendServerRpcClient
 
     public async Task<AgonesSdkServiceResponse> ShutdownAsync(string address)
     {
-        _logger.LogInformation($"Sending {ShutdownAsync} to {address}.");
+        _logger.LogInformation($"Sending {nameof(ShutdownAsync)} to {address}.");
         using var channel = GrpcChannel.ForAddress(address);
         var service = MagicOnionClient.Create<IAgonesService>(channel);
         var result = await service.ShutdownAsync();
