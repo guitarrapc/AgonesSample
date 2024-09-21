@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
-using SimpleFrontEnd.Models;
+using Microsoft.AspNetCore.Components;
+using SimpleFrontEnd.Infrastructures;
+using SimpleFrontEnd.Services;
 using SimpleShared;
 
 namespace SimpleFrontEnd.Pages;
@@ -7,11 +8,12 @@ namespace SimpleFrontEnd.Pages;
 public partial class AgonesService : ComponentBase
 {
     [Inject]
-    public Models.BackendServerRpcClient AgonesServerService { get; set; } = default!;
+    public AgonesServiceRpcClient AgonesServerService { get; set; } = default!;
     [Inject]
     public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
 
     public string Result { get; set; } = "";
+    public string Message { get; set; } = "";
     public string Detail { get; set; } = "";
     public string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
         ? DockerServiceProvider.Current.IsRunningOnDocker
@@ -21,77 +23,38 @@ public partial class AgonesService : ComponentBase
 
     private async Task AllocateAsync()
     {
-        try
-        {
-            var result = await AgonesServerService.AllocateCrdAsync("http://" + Input.Trim());
-            Result = result.Result;
-            Detail = result.Detail;
-        }
-        catch (Exception ex)
-        {
-            Result = ex.Message;
-            Detail = ex.StackTrace ?? "";
-        }
-    }
-
-    private async Task ConnectAsync()
-    {
-        try
-        {
-            var result = await AgonesServerService.ConnectAsync("http://" + Input.Trim());
-            Result = result.Result;
-            Detail = result.Detail;
-        }
-        catch (Exception ex)
-        {
-            Result = ex.Message;
-            Detail = ex.StackTrace ?? "";
-        }
+        var result = await AgonesServerService.AllocateCrdAsync("http://" + Input.Trim());
+        Result = result.Status.ToString();
+        Message = result.Message;
+        Detail = result.Detail;
     }
 
     private async Task ReadyAsync()
     {
-        try
-        {
-            var result = await AgonesServerService.ReadyAsync("http://" + Input.Trim());
-            Result = result.Result;
-            Detail = result.Detail;
-        }
-        catch (Exception ex)
-        {
-            Result = ex.Message;
-            Detail = ex.StackTrace ?? "";
-        }
+        var result = await AgonesServerService.ReadyAsync("http://" + Input.Trim());
+        Result = result.Status.ToString();
+        Message = result.Message;
+        Detail = result.Detail;
     }
 
     private async Task GetGameServerAsync()
     {
-        try
-        {
-            var result = await AgonesServerService.GetGameServerAsync("http://" + Input.Trim());
-            Result = result.Result;
-            Detail = result.Detail;
-        }
-        catch (Exception ex)
-        {
-            Result = ex.Message;
-            Detail = ex.StackTrace ?? "";
-        }
+        var result = await AgonesServerService.GetGameServerAsync("http://" + Input.Trim());
+        Result = result.Status.ToString();
+        Message = result.Message;
+        Detail = result.Detail;
     }
 
     private async Task ShutdownAsync()
     {
-        try
+        var result = await AgonesServerService.ShutdownAsync("http://" + Input.Trim());
+        Result = result.Status.ToString();
+        Message = result.Message;
+        Detail = result.Detail;
+
+        if (result.IsSuccess)
         {
-            var result = await AgonesServerService.ShutdownAsync("http://" + Input.Trim());
             AgonesAllocationService.RemoveAllocationEntry(Input);
-            Result = result.Result;
-            Detail = result.Detail;
-        }
-        catch (Exception ex)
-        {
-            Result = ex.Message;
-            Detail = ex.StackTrace ?? "";
         }
     }
 }

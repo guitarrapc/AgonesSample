@@ -1,4 +1,4 @@
-﻿using MagicOnion;
+using MagicOnion;
 using MessagePack;
 
 namespace SimpleShared;
@@ -10,11 +10,6 @@ public interface IAgonesService : IService<IAgonesService>
     /// </summary>
     /// <returns></returns>
     UnaryResult<AgonesResult> AllocateAsync();
-    /// <summary>
-    /// Connect to AgonesSDK
-    /// </summary>
-    /// <returns></returns>
-    UnaryResult<AgonesResult> ConnectAsync();
     /// <summary>
     /// Set GameServer Status to READY
     /// </summary>
@@ -35,12 +30,12 @@ public interface IAgonesService : IService<IAgonesService>
 [MessagePackObject(true)]
 public class AgonesResult
 {
-    public bool Success { get; }
+    public bool IsSuccess { get; }
     public string Detail { get; }
 
-    public AgonesResult(bool success, string detail)
+    public AgonesResult(bool isSuccess, string detail)
     {
-        Success = success;
+        IsSuccess = isSuccess;
         Detail = detail;
     }
 }

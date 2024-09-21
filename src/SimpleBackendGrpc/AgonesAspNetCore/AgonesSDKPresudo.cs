@@ -1,4 +1,4 @@
-﻿using Agones;
+using Agones;
 using Agones.Dev.Sdk;
 using Grpc.Core;
 using Microsoft.Extensions.Options;
@@ -10,32 +10,37 @@ namespace AgonesAspNetCore;
 /// </summary>
 public class AgonesSDKPresudo : IAgonesSDK
 {
-    private readonly IOptions<AgonesOptions> _options;
-    private readonly ILogger? _logger;
-    private AgonesState _status;
-    private bool _connected;
-    private bool _healthChecked;
-    private readonly GameServer _gameServer;
+    private readonly AgonesCondition _condition;
+    private readonly IHostApplicationLifetime _lifetime;
+    private readonly IOptionsMonitor<AgonesOptions> _options;
+    private readonly ILogger<AgonesSDKPresudo> _logger;
+    private bool _disposed; // connection status
+    private GameServer _gameServer;
+    private readonly object _lock = new();
 
-    private bool IsShutdowned => _status == AgonesState.Shutdown;
-
-    public AgonesSDKPresudo(IOptions<AgonesOptions> options, ILogger? logger = null)
+    public AgonesSDKPresudo(AgonesCondition condition, IHostApplicationLifetime lifetime, IOptionsMonitor<AgonesOptions> options, ILogger<AgonesSDKPresudo> logger)
     {
+        _condition = condition;
+        _lifetime = lifetime;
         _options = options;
         _logger = logger;
-        _status = AgonesState.Scheduled;
-        _connected = false;
-        _healthChecked = false;
+        _disposed = false;
 
-        var fleetName = options.Value.EmulateSdkFleetName.ToLower();
+        _gameServer = InitGameServer(options.CurrentValue);
+        options.OnChange(x => _gameServer = InitGameServer(x));
+    }
+
+    private GameServer InitGameServer(AgonesOptions options)
+    {
+        var fleetName = options.EmulateSdkFleetName.ToLower();
         var (gssName, gsName) = GetGameServerNames(fleetName);
 
-        _gameServer = new GameServer()
+        var gs = new GameServer()
         {
             ObjectMeta = new GameServer.Types.ObjectMeta
             {
                 Name = gsName,
-                Namespace = options.Value.EmulateSdkNameSpace,
+                Namespace = options.EmulateSdkNameSpace,
             },
             Spec = new GameServer.Types.Spec
             {
@@ -52,152 +57,151 @@ public class AgonesSDKPresudo : IAgonesSDK
                 State = AgonesState.Scheduled.ToString(),
             },
         };
-        _gameServer.ObjectMeta.Labels.TryAdd("agones.dev/fleet", fleetName);
-        _gameServer.ObjectMeta.Labels.TryAdd("agones.dev/gameserverset", gssName);
-        _gameServer.Status.Ports.Add(new GameServer.Types.Status.Types.Port
+        gs.ObjectMeta.Labels.TryAdd("agones.dev/fleet", fleetName);
+        gs.ObjectMeta.Labels.TryAdd("agones.dev/gameserverset", gssName);
+        gs.Status.Ports.Add(new GameServer.Types.Status.Types.Port
         {
             Name = "default",
-            Port_ = options.Value.EmulateSdkPort,
+            Port_ = options.EmulateSdkPort,
         });
+
+        return gs;
     }
 
-    public Task<Status> AllocateAsync()
+    public async Task<Status> AllocateAsync()
     {
-        _logger?.LogDebug($"{nameof(AllocateAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
-        if (!_connected)
-            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+        _logger.LogDebug($"{nameof(AllocateAsync)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
 
-        _status = AgonesState.Allocated;
         _gameServer.Status.State = AgonesState.Allocated.ToString();
-        return Task.FromResult(Status.DefaultSuccess);
+        _condition.SetAllocated();
+
+        return Status.DefaultSuccess;
     }
 
-    // https://agones.dev/site/docs/guides/client-sdks/#alphaplayerconnectplayerid
+    /// <summary>
+    /// https://github.com/googleforgames/agones/blob/main/sdks/csharp/sdk/Alpha.cs
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
     public IAgonesAlphaSDK Alpha()
     {
-        _logger?.LogDebug($"{nameof(Alpha)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
+        _logger.LogDebug($"{nameof(Alpha)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
+
         throw new NotImplementedException();
     }
-
-    public Task<bool> ConnectAsync()
+    /// <summary>
+    /// https://github.com/googleforgames/agones/blob/main/sdks/csharp/sdk/Beta.cs
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public IAgonesBetaSDK Beta()
     {
-        _logger?.LogDebug($"{nameof(ConnectAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
+        _logger.LogDebug($"{nameof(Beta)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
 
-        _connected = true;
-        _status = AgonesState.Scheduled;
-        _gameServer.Status.State = AgonesState.Scheduled.ToString();
-        return Task.FromResult(true);
+        throw new NotImplementedException();
     }
 
     public void Dispose()
     {
-    }
-
-    public Task<GameServer> GetGameServerAsync()
-    {
-        _logger?.LogDebug($"{nameof(GetGameServerAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
-        if (!_connected)
-            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
-
-        return Task.FromResult(_gameServer);
-    }
-
-    public Task<Status> HealthAsync()
-    {
-        _logger?.LogDebug($"{nameof(HealthAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
-        if (!_connected)
+        lock (_lock)
         {
-            _gameServer.Status.State = AgonesState.Unhealthy.ToString();
-            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+            if (_disposed) throw new ObjectDisposedException(nameof(AgonesSDKPresudo));
+            _disposed = true;
         }
-
-        _healthChecked = true;
-        return Task.FromResult(Status.DefaultSuccess);
     }
 
-    public Task<Status> ReadyAsync()
+    public async Task<GameServer> GetGameServerAsync()
     {
-        _logger?.LogDebug($"{nameof(ReadyAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (!_connected)
-            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
+        _logger.LogDebug($"{nameof(GetGameServerAsync)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
 
-        _status = AgonesState.Ready;
+        return _gameServer;
+    }
+
+    public async Task<Status> HealthAsync()
+    {
+        _logger.LogDebug($"{nameof(HealthAsync)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
+
+        return Status.DefaultSuccess;
+    }
+
+    public async Task<Status> ReadyAsync()
+    {
+        _logger.LogDebug($"{nameof(ReadyAsync)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
+
         _gameServer.Status.State = AgonesState.Ready.ToString();
-        return Task.FromResult(Status.DefaultSuccess);
+        _condition.SetReady();
+
+        return Status.DefaultSuccess;
     }
 
-    public Task<Status> ReserveAsync(long seconds)
+    public async Task<Status> ReserveAsync(long seconds)
     {
-        _logger?.LogDebug($"{nameof(ReserveAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
-        if (!_connected)
-            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+        _logger.LogDebug($"{nameof(ReserveAsync)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
 
-        _status = AgonesState.Reserved;
         _gameServer.Status.State = AgonesState.Reserved.ToString();
-        return Task.FromResult(Status.DefaultSuccess);
+        _condition.SetReserved();
+
+        return Status.DefaultSuccess;
     }
 
-    public Task<Status> SetAnnotationAsync(string key, string value)
+    public async Task<Status> SetAnnotationAsync(string key, string value)
     {
-        _logger?.LogDebug($"{nameof(SetAnnotationAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
-        if (!_connected)
-            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+        _logger.LogDebug($"{nameof(SetAnnotationAsync)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
 
         _gameServer.ObjectMeta.Annotations[key] = value;
 
-        return Task.FromResult(Status.DefaultSuccess);
+        return Status.DefaultSuccess;
     }
 
-    public Task<Status> SetLabelAsync(string key, string value)
+    public async Task<Status> SetLabelAsync(string key, string value)
     {
-        _logger?.LogDebug($"{nameof(SetLabelAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
-        if (!_connected)
-            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+        _logger.LogDebug($"{nameof(SetLabelAsync)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
 
         _gameServer.ObjectMeta.Labels[key] = value;
 
-        return Task.FromResult(Status.DefaultSuccess);
+        return Status.DefaultSuccess;
     }
 
-    public Task<Status> ShutDownAsync()
+    public async Task<Status> ShutDownAsync()
     {
-        // You can recover via calling ConnectAsync.
-        _logger?.LogDebug($"{nameof(ShutDownAsync)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
-        if (IsShutdowned)
-            throw new HttpRequestException($"AgonesSDK already shutdowned.", null, System.Net.HttpStatusCode.BadRequest);
-        if (!_connected)
-            throw new HttpRequestException($"Please run {nameof(ConnectAsync)} before call method.", null, System.Net.HttpStatusCode.BadRequest);
+        _logger.LogDebug($"{nameof(ShutDownAsync)} called. status {_gameServer.Status.State};");
+        ValidateAvailable();
 
-        _status = AgonesState.Shutdown;
-        _gameServer.Status.State = AgonesState.Shutdown.ToString();
-        if (!_options?.Value.EmulateSdkNoShutdown ?? false)
+        lock (_lock)
         {
-            _ = Task.Run(async () =>
+            if (_condition.State != AgonesState.Shutdown)
             {
-                await Task.Delay(3 * 1000);
-                Environment.Exit(99); // Let's indicate custom error code for docker restart.
-            });
+                _gameServer.Status.State = AgonesState.Shutdown.ToString();
+                _condition.SetShutdown();
+
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+
+                    // Let's indicate custom error code for container restart.
+                    Environment.ExitCode = 99;
+
+                    // Stop server application
+                    _lifetime.StopApplication();
+                });
+            }
         }
-        return Task.FromResult(Status.DefaultSuccess);
+
+        return Status.DefaultSuccess;
     }
 
     public void WatchGameServer(Action<GameServer> callback)
     {
-        _logger?.LogDebug($"{nameof(WatchGameServer)} called. status {_status}; connected {_connected}; healthChecked {_healthChecked};");
+        _logger.LogDebug($"{nameof(WatchGameServer)} called. status {_gameServer.Status.State};");
         callback(_gameServer);
     }
 
@@ -233,5 +237,11 @@ public class AgonesSDKPresudo : IAgonesSDK
         var gssName = fleetName + "-" + HashString(fleetName, 5);
         var gsName = gssName + "-" + HashString(num.ToString(), 5);
         return (gssName, gsName);
+    }
+
+    private void ValidateAvailable()
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(AgonesSDKPresudo));
     }
 }

@@ -1,23 +1,12 @@
-﻿using System.Text.Json;
+using SimpleFrontEnd.Data;
+using SimpleFrontEnd.Infrastructures;
 using SimpleShared;
+using System.Text.Json;
 
-namespace SimpleFrontEnd.Models;
+namespace SimpleFrontEnd.Services;
 
-public class AgonesGameServerService
+public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesServiceRpcClient agonesRpcService, KubernetesApiClient kubernetesApi)
 {
-    private readonly IAgonesAllocationDatabase _database;
-    private readonly ILogger<AgonesGameServerService> _logger;
-    private readonly BackendServerRpcClient _agonesServerRpcService;
-    private readonly KubernetesApiClient _kubernetesApi;
-
-    public AgonesGameServerService(IAgonesAllocationDatabase database, BackendServerRpcClient agonesRpcService, KubernetesApiClient kubernetesApi, ILogger<AgonesGameServerService> logger)
-    {
-        _database = database;
-        _agonesServerRpcService = agonesRpcService;
-        _kubernetesApi = kubernetesApi;
-        _logger = logger;
-    }
-
     public async Task<KubernetesAgonesGameServerListResponse?> GetGameServersAsync(string @namespace)
     {
         if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
@@ -37,7 +26,7 @@ public class AgonesGameServerService
     private async Task<KubernetesAgonesGameServerListResponse?> GetGameServersKubernetesAsync(string @namespace)
     {
         // ref: https://agones.dev/site/docs/guides/access-api/
-        var json = await _kubernetesApi.SendKubernetesApiAsync($"/apis/agones.dev/v1/namespaces/{@namespace}/gameservers", HttpMethod.Get);
+        var json = await kubernetesApi.SendKubernetesApiAsync($"/apis/agones.dev/v1/namespaces/{@namespace}/gameservers", HttpMethod.Get);
         var response = JsonSerializer.Deserialize<KubernetesAgonesGameServerListResponse>(json);
         return response;
     }
@@ -48,11 +37,13 @@ public class AgonesGameServerService
     /// <returns></returns>
     private async Task<KubernetesAgonesGameServerListResponse?> GetGameServersAgonesAsync()
     {
-        var servers = _database.Items.Select(x => $"http://{x}").ToArray();
-        var tasks = servers.Select(x => _agonesServerRpcService.GetGameServerAsync(x));
+        var servers = database.Items.Select(x => $"http://{x}").ToArray();
+        var tasks = servers.Select(x => agonesRpcService.GetGameServerAsync(x));
         var gameServerResponses = await Task.WhenAll(tasks);
 
-        var items = gameServerResponses.Select(x => x.Detail)
+        var items = gameServerResponses
+            .Where(x => x.IsSuccess)
+            .Select(x => x.Detail)
             .Select(x => JsonSerializer.Deserialize<AgonesSdkGameServerMock>(x))
             .Where(x => x is not null)
             .Select(x => x!.ToKubernetesAgonesGameServerResponse(nodeName: "localhost"))

@@ -1,13 +1,14 @@
-﻿using System.Collections.Immutable;
 using Grpc.Net.Client;
 using MagicOnion.Client;
 using Microsoft.AspNetCore.Components;
-using SimpleFrontEnd.Models;
+using SimpleFrontEnd.Infrastructures;
+using SimpleFrontEnd.Services;
 using SimpleShared;
+using System.Collections.Immutable;
 
 namespace SimpleFrontEnd.Pages;
 
-public partial class Connect : ComponentBase, IRandomHubReciever, IDisposable
+public partial class Connect : ComponentBase, IRandomHubReciever, IAsyncDisposable
 {
     [Inject]
     public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
@@ -28,7 +29,7 @@ public partial class Connect : ComponentBase, IRandomHubReciever, IDisposable
         if (address is null)
             return;
 
-        _channel = GrpcChannel.ForAddress(address);
+        _channel = GrpcChannelPool.Instance.CreateChannel(address);
         _hubClient = await StreamingHubClient.ConnectAsync<IRandomHub, IRandomHubReciever>(_channel, this);
         var result = await _hubClient.StartAsync();
         _address = address;
@@ -36,15 +37,14 @@ public partial class Connect : ComponentBase, IRandomHubReciever, IDisposable
         _id = result.Id;
 
         _connected = true;
-
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (_hubClient is not null)
-            _hubClient.DisposeAsync().Wait();
-
-        _channel?.Dispose();
+        {
+            await _hubClient.DisposeAsync();
+        }
     }
 
     public void OnMessageRecieved(string message)

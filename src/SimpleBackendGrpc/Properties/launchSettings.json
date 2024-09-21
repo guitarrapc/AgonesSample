@@ -1,11 +1,12 @@
 {
+  "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
     "SimpleBackendGrpc": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:5157",
+      "applicationUrl": "http://+:5157",
       "dotnetRunMessages": true
     },
     "Docker": {
@@ -16,10 +17,10 @@
     },
     "WSL": {
       "commandName": "WSL2",
-      "launchUrl": "http://localhost:5217",
+      "launchUrl": "http://+:5217",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://localhost:5157"
+        "ASPNETCORE_URLS": "http://+:5157"
       },
       "distributionName": ""
     }

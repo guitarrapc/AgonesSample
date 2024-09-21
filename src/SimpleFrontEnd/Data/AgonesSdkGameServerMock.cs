@@ -1,7 +1,7 @@
-﻿using System.Reflection;
 using SimpleShared;
+using System.Reflection;
 
-namespace SimpleFrontEnd.Models;
+namespace SimpleFrontEnd.Data;
 
 public class AgonesSdkGameServerMock
 {

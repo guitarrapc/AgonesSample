@@ -4,8 +4,7 @@
     "SimpleBackend": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "AgonesSdk__EmulateSdkNoShutdown": "true"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true
     },

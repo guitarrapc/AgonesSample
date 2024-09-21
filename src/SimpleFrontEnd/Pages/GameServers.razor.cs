@@ -1,18 +1,20 @@
-﻿using Microsoft.AspNetCore.Components;
-using SimpleFrontEnd.Models;
+using Microsoft.AspNetCore.Components;
+using SimpleFrontEnd.Infrastructures;
+using SimpleFrontEnd.Services;
 
 namespace SimpleFrontEnd.Pages;
 
 public partial class GameServers : ComponentBase
 {
     [Inject]
-    public Models.BackendServerRpcClient AgonesServerService { get; set; } = default!;
+    public AgonesServiceRpcClient AgonesServerService { get; set; } = default!;
     [Inject]
     public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
     [Inject]
     public AgonesGameServerService AgonesGameServerService { get; set; } = default!;
 
-    public string? Result { get; set; }
+    public string Message { get; set; } = "";
+    public string Detail { get; set; } = "";
     public GameServerViewModel[] List { get; set; } = Array.Empty<GameServerViewModel>();
 
     private async Task GetGameServersAsync()
@@ -21,7 +23,8 @@ public partial class GameServers : ComponentBase
         {
             var gameservers = await AgonesGameServerService.GetGameServersAsync("default");
 
-            Result = $"{gameservers?.items?.Length ?? 0} GameServers found.";
+            Message = $"{gameservers?.items?.Length ?? 0} GameServers found.";
+            Detail = "";
             List = gameservers?.items is not null
                 ? gameservers!.items.Select(x => new GameServerViewModel
                 {
@@ -38,7 +41,8 @@ public partial class GameServers : ComponentBase
         }
         catch (Exception ex)
         {
-            Result = $"Could not retrieve GameServerList. {ex.Message}";
+            Message = $"Could not retrieve GameServerList.";
+            Detail = $"{ex.Message} {ex.StackTrace}";
             List = Array.Empty<GameServerViewModel>();
         }
 
@@ -49,17 +53,19 @@ public partial class GameServers : ComponentBase
     {
         if (input is null) return;
 
-        try
+        var endpoint = input.Trim();
+        var result = await AgonesServerService.ShutdownAsync("http://" + endpoint);
+        Message = result.Message;
+        Detail = result.Detail;
+
+        if (!result.IsSuccess)
         {
-            var endpoint = input.Trim();
-            var result = await AgonesServerService.ShutdownAsync("http://" + endpoint);
-            AgonesAllocationService.RemoveAllocationEntry(endpoint);
-            Result = result.Detail;
+            StateHasChanged();
+            return;
         }
-        catch (Exception ex)
-        {
-            Result = ex.Message;
-        }
+
+        // Remove Allocation Entry
+        AgonesAllocationService.RemoveAllocationEntry(endpoint);
 
         // refresh page
         await GetGameServersAsync();

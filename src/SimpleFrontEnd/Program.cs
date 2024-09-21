@@ -1,9 +1,6 @@
-﻿using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using SimpleFrontEnd.Data;
-using SimpleFrontEnd.Models;
+﻿using SimpleFrontEnd.Data;
+using SimpleFrontEnd.Infrastructures;
+using SimpleFrontEnd.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +36,7 @@ public static class StartupExtentions
     {
         builder.Services.AddSingleton<IAgonesAllocationDatabase, InmemoryAgonesAllocationDatabase>();
         builder.Services.AddSingleton<AgonesAllocatorApiClient>();
-        builder.Services.AddSingleton<BackendServerRpcClient>();
+        builder.Services.AddSingleton<AgonesServiceRpcClient>();
         builder.Services.AddSingleton<KubernetesApiClient>();
         builder.Services.AddSingleton<AgonesAllocationService>();
         builder.Services.AddSingleton<AgonesGameServerService>();

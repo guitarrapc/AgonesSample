@@ -1,9 +1,9 @@
-﻿@page "/gameservers"
+@page "/gameservers"
 <h3>GameServers</h3>
 
 <p>GameServer API: <button @onclick="() => GetGameServersAsync()">Submit</button> </p>
 <hr>
-<p>Result: @Result</p>
+<p>Result: @Message</p>
 <table class="table">
     <thead>
         <tr>
@@ -36,3 +36,6 @@
     </tbody>
 </table>
 
+<hr>
+
+<pre class="json">@Detail</pre>

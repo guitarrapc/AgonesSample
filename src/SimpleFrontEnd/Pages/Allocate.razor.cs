@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using SimpleFrontEnd.Models;
+using SimpleFrontEnd.Services;
 using SimpleShared;
 
 namespace SimpleFrontEnd.Pages;

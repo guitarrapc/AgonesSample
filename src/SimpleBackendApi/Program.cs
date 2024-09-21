@@ -1,13 +1,10 @@
-﻿namespace SimpleBackendApi;
+using SimpleBackendApi.Infrastructures;
+
+namespace SimpleBackendApi;
 
 public class Program
 {
     public static async Task Main(string[] args)
-    {
-        await RunApp(args);
-    }
-
-    public static async Task RunApp(string[] args)
     {
         var option = new WebApplicationOptions
         {
@@ -15,30 +12,22 @@ public class Program
             ContentRootPath = Path.GetDirectoryName(typeof(Program).Assembly.Location),
         };
         var builder = WebApplication.CreateBuilder(option);
-        builder.Host.ConfigureAppConfiguration((hostContext, config) =>
-        {
-            config.AddJsonFile($"appsettings.Api.json");
-            config.AddJsonFile($"appsettings.Api.{hostContext.HostingEnvironment.EnvironmentName}.json", optional: true);
-        });
+        builder.Configuration.AddJsonFile($"appsettings.Api.json");
+        builder.Configuration.AddJsonFile($"appsettings.Api.{builder.Environment.EnvironmentName}.json", optional: true);
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        // Configure Server Listener
+        builder.ConfigureEndpoint();
+
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-        else
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+        // let's allow allow swagger even not Development
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         var summaries = new[]
         {

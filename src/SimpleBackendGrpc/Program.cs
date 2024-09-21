@@ -1,4 +1,5 @@
-﻿using AgonesAspNetCore;
+using AgonesAspNetCore;
+using SimpleBackendGrpc.Infrastructures;
 using SimpleBackendGrpc.Services;
 
 namespace SimpleBackendGrpc;
@@ -7,22 +8,17 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        await RunApp(args);
-    }
-
-    public static async Task RunApp(string[] args)
-    {
         var option = new WebApplicationOptions
         {
             Args = args,
             ContentRootPath = Path.GetDirectoryName(typeof(Program).Assembly.Location),
         };
         var builder = WebApplication.CreateBuilder(option);
-        builder.Host.ConfigureAppConfiguration((hostContext, config) =>
-        {
-            config.AddJsonFile($"appsettings.Grpc.json");
-            config.AddJsonFile($"appsettings.Grpc.{hostContext.HostingEnvironment.EnvironmentName}.json", optional: true);
-        });
+        builder.Configuration.AddJsonFile($"appsettings.Grpc.json");
+        builder.Configuration.AddJsonFile($"appsettings.Grpc.{builder.Environment.EnvironmentName}.json", optional: true);
+
+        // Add AgonesSDK
+        builder.AddAgonesService().EnableHealthCheck();
 
         // Additional configuration is required to successfully run gRPC on macOS.
         // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
@@ -30,7 +26,9 @@ public class Program
         // Add services to the container.
         builder.Services.AddGrpc();
         builder.Services.AddMagicOnion();
-        builder.Services.AddAgonesSdk().UseHostedService();
+
+        // Configure Server Listener
+        builder.ConfigureEndpoint();
 
         var app = builder.Build();
 

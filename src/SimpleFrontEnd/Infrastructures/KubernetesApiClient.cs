@@ -1,28 +1,18 @@
-﻿using System.Net.Http.Headers;
-using System.Text.Json;
 using SimpleShared;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
-namespace SimpleFrontEnd.Models;
+namespace SimpleFrontEnd.Infrastructures;
 
-public class KubernetesApiClient
+public class KubernetesApiClient(IHttpClientFactory httpClientFactory)
 {
-    private readonly ILogger<KubernetesApiClient> _logger;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly string _endpoint;
-    private readonly string _accessToken;
+    private readonly string _endpoint = KubernetesServiceProvider.Current.KubernetesServiceEndPoint;
+    private readonly string _accessToken = KubernetesServiceProvider.Current.AccessToken;
     private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
     {
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         WriteIndented = true,
     };
-
-    public KubernetesApiClient(IHttpClientFactory httpClientFactory, ILogger<KubernetesApiClient> logger)
-    {
-        _logger = logger;
-        _httpClientFactory = httpClientFactory;
-        _endpoint = KubernetesServiceProvider.Current.KubernetesServiceEndPoint;
-        _accessToken = KubernetesServiceProvider.Current.AccessToken;
-    }
 
     /// <summary>
     /// Send Request to Kubernetes API and get T result.
@@ -32,7 +22,7 @@ public class KubernetesApiClient
     /// <returns></returns>
     public async Task<ResponseT> SendKubernetesApiAsync<ResponseT>(string path, HttpMethod method, HttpContent? content = null)
     {
-        var httpClient = _httpClientFactory.CreateClient("kubernetes-api");
+        var httpClient = httpClientFactory.CreateClient("kubernetes-api");
         var request = new HttpRequestMessage(method, $"{_endpoint}{path}");
         request.Headers.TryAddWithoutValidation("Accept", "application/json");
         request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {_accessToken}");
@@ -62,7 +52,7 @@ public class KubernetesApiClient
     /// <returns></returns>
     public async Task<string> SendKubernetesApiAsync(string path, HttpMethod method, HttpContent? content = null)
     {
-        var httpClient = _httpClientFactory.CreateClient("kubernetes-api");
+        var httpClient = httpClientFactory.CreateClient("kubernetes-api");
         var request = new HttpRequestMessage(method, $"{_endpoint}{path}");
         request.Headers.TryAddWithoutValidation("Accept", "application/json");
         request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {_accessToken}");
@@ -78,5 +68,4 @@ public class KubernetesApiClient
         result.EnsureSuccessStatusCode();
         return await result.Content.ReadAsStringAsync();
     }
-
 }

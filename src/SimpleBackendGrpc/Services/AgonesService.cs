@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
 using Agones;
 using MagicOnion;
 using MagicOnion.Server;
 using SimpleShared;
+using System.Text.Json;
 
 namespace SimpleBackendGrpc.Services;
 
@@ -26,12 +26,6 @@ public class AgonesService : ServiceBase<IAgonesService>, IAgonesService
     {
         var res = await _agonesSdk.AllocateAsync();
         return new AgonesResult(res.StatusCode == Grpc.Core.StatusCode.OK, res.Detail);
-    }
-
-    public async UnaryResult<AgonesResult> ConnectAsync()
-    {
-        var success = await _agonesSdk.ConnectAsync();
-        return new AgonesResult(success, "");
     }
 
     public async UnaryResult<AgonesResult> GetGameServerAsync()

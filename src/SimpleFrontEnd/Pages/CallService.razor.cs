@@ -1,7 +1,7 @@
-﻿using Grpc.Net.Client;
 using MagicOnion.Client;
 using Microsoft.AspNetCore.Components;
-using SimpleFrontEnd.Models;
+using SimpleFrontEnd.Infrastructures;
+using SimpleFrontEnd.Services;
 using SimpleShared;
 
 namespace SimpleFrontEnd.Pages;
@@ -24,7 +24,7 @@ public partial class CallService : ComponentBase
                 throw new ArgumentNullException(nameof(_address));
         }
 
-        using var channel = GrpcChannel.ForAddress(_address);
+        var channel = GrpcChannelPool.Instance.CreateChannel(_address);
         var echoService = MagicOnionClient.Create<IEchoService>(channel);
         Result = await echoService.EchoAsync(Input);
     }
