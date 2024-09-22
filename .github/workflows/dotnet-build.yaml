@@ -30,12 +30,12 @@ jobs:
   docker:
     strategy:
       matrix:
-        project: ["SimpleBackend", "SimpleFrontEnd"]
+        project: ["BackendServer", "FrontEnd"]
         include:
-          - project: "SimpleBackend"
-            docker-image: guitarrapc/agonessample-simplebackend
-          - project: "SimpleFrontEnd"
-            docker-image: guitarrapc/agonessample-simplefrontend
+          - project: "BackendServer"
+            docker-image: guitarrapc/agonessample-BackendServer
+          - project: "FrontEnd"
+            docker-image: guitarrapc/agonessample-FrontEnd
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

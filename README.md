@@ -1,7 +1,7 @@
 # AgonesSample
 
-* [guitarrapc/agonessample-simplebackend](https://hub.docker.com/r/guitarrapc/agonessample-simplebackend) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleBackend/Dockerfile)
-* [guitarrapc/agonessample-simplefrontend](https://hub.docker.com/r/guitarrapc/agonessample-simplefrontend) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleFrontEnd/Dockerfile)
+* [guitarrapc/agonessample-BackendServer](https://hub.docker.com/r/guitarrapc/agonessample-BackendServer) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/BackendServer/Dockerfile)
+* [guitarrapc/agonessample-FrontEnd](https://hub.docker.com/r/guitarrapc/agonessample-FrontEnd) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/FrontEnd/Dockerfile)
 
 # Prerequisites
 
@@ -53,12 +53,12 @@ Run docker-compose to emulate AgonesSDK. Use [examples/docker/compose.yaml](http
 ```yaml
 services:
   frontend:
-    image: agonessample-simplefrontend:v2.0.0
+    image: agonessample-FrontEnd:v2.0.0
     ports:
       - 5104:80
 
   server:
-    image: agonessample-simplebackend:v2.0.0
+    image: agonessample-BackendServer:v2.0.0
     ports:
       - 5157:80
 ```

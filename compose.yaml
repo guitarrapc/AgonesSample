@@ -1,17 +1,17 @@
 services:
   frontend:
     build:
-      dockerfile: ./src/SimpleFrontEnd/Dockerfile
+      dockerfile: ./src/FrontEnd/Dockerfile
       context: .
-    image: agonessample-simplefrontend:dev
+    image: agonessample-FrontEnd:dev
     ports:
       - 5104:80
 
   server:
     build:
-      dockerfile: ./src/SimpleBackend/Dockerfile
+      dockerfile: ./src/BackendServer/Dockerfile
       context: .
-    image: agonessample-simplebackend:dev
+    image: agonessample-BackendServer:dev
     ports:
       - 5157:5157
     restart: on-failure:1 # emulate new pod when shutdown

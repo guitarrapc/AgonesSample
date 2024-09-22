@@ -10,10 +10,10 @@
   "MultiProjectConfigurations": {
     "FrontEnd + Backend": {
       "Projects": {
-        "SimpleFrontEnd": {
+        "FrontendPage": {
           "StartProject": true
         },
-        "SimpleBackend": {}
+        "BackendServer": {}
       }
     }
   }
