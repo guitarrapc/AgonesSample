@@ -1,8 +1,10 @@
+using Shared;
+
 namespace BackendServerGrpc.Infrastructures;
 
 public static class KestrelHelperExtensions
 {
-    private static readonly string defaultListenAddress = "http://0.0.0.0:5157";
+    private static readonly string defaultListenAddress = DockerServiceProvider.Current.IsRunningOnDocker ? "http://0.0.0.0:8080" : "http://0.0.0.0:5157";
     private static readonly string defaultProtocol = "h2c";
 
     public static void ConfigureEndpoint(this WebApplicationBuilder builder)

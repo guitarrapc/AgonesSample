@@ -17,7 +17,7 @@ public partial class AgonesControl : ComponentBase
     public string Detail { get; set; } = "";
     public string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
         ? DockerServiceProvider.Current.IsRunningOnDocker
-            ? "server:80" // docker
+            ? "server:8080" // docker
             : "localhost:5157" // local machine
         : ""; // kubernetes
 
