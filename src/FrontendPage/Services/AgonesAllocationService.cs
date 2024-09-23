@@ -1,5 +1,6 @@
 using FrontendPage.Infrastructures;
 using Shared;
+using Shared.AgonesCrd;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -36,7 +37,7 @@ public class AgonesAllocationService(IAgonesAllocationDatabase database, AgonesS
     /// <returns></returns>
     public async Task<(string endpoint, string response)> SendAllocationApiAsync(string endpoint, string @namespace, string fleetName)
     {
-        var body = AgonesAllocationApiRequest.CreateRequest(@namespace, fleetName);
+        var body = AllocationRequest.CreateRequest(@namespace, fleetName);
         var response = await agonesAllocatorApiClient.SendAllocationApiAsync(endpoint, body);
 
         // debug output response JSON
@@ -56,14 +57,14 @@ public class AgonesAllocationService(IAgonesAllocationDatabase database, AgonesS
     /// <returns></returns>
     public async Task<(string endpoint, string response)> SendAllocationCrdAsync(string @namespace, string fleetName)
     {
-        var body = KubernetesAgonesGameServerAllocationRequest.CreateRequest("allocation", fleetName);
+        var body = GameServerAllocationRequest.CreateRequest("allocation", fleetName);
 
         // ref: https://agones.dev/site/docs/guides/access-api/
         var json = JsonSerializer.Serialize(body);
         logger.LogDebug(json);
 
         var content = new StringContent(json);
-        var response = await kubernetesClient.SendKubernetesApiAsync<KubernetesAgonesGameServerAllocationResponse>($"/apis/allocation.agones.dev/v1/namespaces/{@namespace}/gameserverallocations", HttpMethod.Post, content);
+        var response = await kubernetesClient.SendKubernetesApiAsync<GameServerAllocationResponse>($"/apis/allocation.agones.dev/v1/namespaces/{@namespace}/gameserverallocations", HttpMethod.Post, content);
 
         if (response == null) throw new ArgumentNullException(nameof(response));
 

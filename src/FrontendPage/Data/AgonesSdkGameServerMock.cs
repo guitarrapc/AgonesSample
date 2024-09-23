@@ -1,4 +1,4 @@
-using Shared;
+using Shared.AgonesCrd;
 using System.Reflection;
 
 namespace FrontendPage.Data;
@@ -39,8 +39,15 @@ public class AgonesSdkGameServerMock
     {
         public string? state { get; set; }
         public string? address { get; set; }
+        public Adddress[]? addresses { get; set; }
         public Port[]? ports { get; set; }
         public object? players { get; set; }
+    }
+
+    public class Adddress
+    {
+        public string? type { get; set; }
+        public string? address { get; set; }
     }
 
     public class Port
@@ -49,11 +56,11 @@ public class AgonesSdkGameServerMock
         public int port_ { get; set; }
     }
 
-    public KubernetesAgonesGameServerResponse ToKubernetesAgonesGameServerResponse(string nodeName = "")
+    public GameServerResponse ToAgonesCrdGameServerResponse(string nodeName = "")
     {
-        return new KubernetesAgonesGameServerResponse
+        return new GameServerResponse
         {
-            metadata = new KubernetesAgonesGameServerResponse.Metadata
+            metadata = new GameServerResponse.Metadata
             {
                 name = objectMeta?.name,
                 @namespace = objectMeta?.@namespace,
@@ -61,19 +68,19 @@ public class AgonesSdkGameServerMock
                 labels = objectMeta?.labels,
                 creationTimestamp = new FileInfo(Assembly.GetEntryAssembly()!.Location).LastWriteTimeUtc, // It's mock. Let's use Assembly write time.
             },
-            spec = new KubernetesAgonesGameServerResponse.Spec
+            spec = new GameServerResponse.Spec
             {
-                health = new KubernetesAgonesGameServerResponse.Health
+                health = new GameServerResponse.Health
                 {
                     failureThreshold = spec?.health?.failureThreshold ?? 0,
                     initialDelaySeconds = spec?.health?.initialDelaySeconds ?? 0,
                     periodSeconds = spec?.health?.periodSeconds ?? 0,
                 },
             },
-            status = new KubernetesAgonesGameServerResponse.Status
+            status = new GameServerResponse.Status
             {
                 address = status?.address,
-                ports = status?.ports?.Select(x => new KubernetesAgonesGameServerResponse.Port
+                ports = status?.ports?.Select(x => new GameServerResponse.Port
                 {
                     name = x.name,
                     port = x.port_,

@@ -1,10 +1,10 @@
-﻿namespace Shared;
+namespace Shared.AgonesCrd;
 
 /// <summary>
 /// Agones GameServer Response from Kubernetes.
 /// ref: https://agones.dev/site/docs/reference/gameserver/
 /// </summary>
-public class KubernetesAgonesGameServerResponse
+public class GameServerResponse
 {
     public string apiVersion { get; set; } = "agones.dev/v1";
     public string kind { get; set; } = "GameServer";

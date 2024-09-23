@@ -1,4 +1,4 @@
-using Shared;
+using Shared.AgonesCrd;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
@@ -20,7 +20,7 @@ public class AgonesAllocatorApiClient(IHttpClientFactory httpClientFactory, ILog
     /// <param name="body"></param>
     /// <returns></returns>
     /// <exception cref="HttpRequestException"></exception>
-    public async Task<AgonesAllocationApiResponse> SendAllocationApiAsync(string endpoint, AgonesAllocationApiRequest body)
+    public async Task<AllocationResponse> SendAllocationApiAsync(string endpoint, AllocationRequest body)
     {
         var requestJson = JsonSerializer.Serialize(body, _serializerOptions);
         logger.LogDebug(requestJson);
@@ -42,7 +42,7 @@ public class AgonesAllocatorApiClient(IHttpClientFactory httpClientFactory, ILog
         // res.EnsureSuccessStatusCode();
 
         var bytes = await res.Content.ReadAsByteArrayAsync();
-        var response = JsonSerializer.Deserialize<AgonesAllocationApiResponse>(bytes, _serializerOptions);
+        var response = JsonSerializer.Deserialize<AllocationResponse>(bytes, _serializerOptions);
 
         if (response == null || !string.IsNullOrEmpty(response.error))
         {

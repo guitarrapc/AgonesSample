@@ -1,13 +1,14 @@
 using FrontendPage.Data;
 using FrontendPage.Infrastructures;
 using Shared;
+using Shared.AgonesCrd;
 using System.Text.Json;
 
 namespace FrontendPage.Services;
 
 public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesServiceRpcClient agonesRpcService, KubernetesApiClient kubernetesApi)
 {
-    public async Task<KubernetesAgonesGameServerListResponse?> GetGameServersAsync(string @namespace)
+    public async Task<GameServerListResponse?> GetGameServersAsync(string @namespace)
     {
         if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
         {
@@ -23,11 +24,11 @@ public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesS
     /// Send Get request to Kubernetes /api endpoint.
     /// </summary>
     /// <returns></returns>
-    private async Task<KubernetesAgonesGameServerListResponse?> GetGameServersKubernetesAsync(string @namespace)
+    private async Task<GameServerListResponse?> GetGameServersKubernetesAsync(string @namespace)
     {
         // ref: https://agones.dev/site/docs/guides/access-api/
         var json = await kubernetesApi.SendKubernetesApiAsync($"/apis/agones.dev/v1/namespaces/{@namespace}/gameservers", HttpMethod.Get);
-        var response = JsonSerializer.Deserialize<KubernetesAgonesGameServerListResponse>(json);
+        var response = JsonSerializer.Deserialize<GameServerListResponse>(json);
         return response;
     }
 
@@ -35,7 +36,7 @@ public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesS
     /// Send Allocation request to Agones.
     /// </summary>
     /// <returns></returns>
-    private async Task<KubernetesAgonesGameServerListResponse?> GetGameServersAgonesAsync()
+    private async Task<GameServerListResponse?> GetGameServersAgonesAsync()
     {
         var servers = database.Items.Select(x => $"http://{x}").ToArray();
         var tasks = servers.Select(x => agonesRpcService.GetGameServerAsync(x));
@@ -46,11 +47,11 @@ public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesS
             .Select(x => x.Detail)
             .Select(x => JsonSerializer.Deserialize<AgonesSdkGameServerMock>(x))
             .Where(x => x is not null)
-            .Select(x => x!.ToKubernetesAgonesGameServerResponse(nodeName: "localhost"))
+            .Select(x => x!.ToAgonesCrdGameServerResponse(nodeName: "localhost"))
             .ToArray()
-            ?? Array.Empty<KubernetesAgonesGameServerResponse>();
+            ?? Array.Empty<GameServerResponse>();
 
-        return new KubernetesAgonesGameServerListResponse
+        return new GameServerListResponse
         {
             items = items,
         };

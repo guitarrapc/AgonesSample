@@ -1,7 +1,6 @@
-﻿using System.Text.Json.Serialization;
-using MessagePack;
+using System.Text.Json.Serialization;
 
-namespace Shared;
+namespace Shared.AgonesCrd;
 
 /// <summary>
 /// Agones GameServerAllocation Request to Kubernetes.
@@ -10,11 +9,12 @@ namespace Shared;
 /// <example>
 /// {"apiVersion":"allocation.agones.dev/v1","kind":"GameServerAllocation","spec":{"selectors":["matchLabels":{"agones.dev/fleet":"FLEETNAME"}]}}
 /// </example>
-public class KubernetesAgonesGameServerAllocationRequest : KubernetesAgonesGameServerAllocationBase
+public class GameServerAllocationRequest
+    : GameServerAllocationBase
 {
-    public static KubernetesAgonesGameServerAllocationRequest CreateRequest(string name, string fleetName)
+    public static GameServerAllocationRequest CreateRequest(string name, string fleetName)
     {
-        var request = new KubernetesAgonesGameServerAllocationRequest()
+        var request = new GameServerAllocationRequest()
         {
             metadata = new Metadata
             {
@@ -45,7 +45,7 @@ public class KubernetesAgonesGameServerAllocationRequest : KubernetesAgonesGameS
 /// Agones GameServerAllocation Response fron Kubernetes.
 /// ref: https://agones.dev/site/docs/reference/gameserverallocation/
 /// </summary>
-public class KubernetesAgonesGameServerAllocationResponse : KubernetesAgonesGameServerAllocationBase, IGameServerAllocationResponse
+public class GameServerAllocationResponse : GameServerAllocationBase, IGameServerAllocationResponse
 {
     public Status? status { get; set; }
     public class Status
@@ -68,7 +68,7 @@ public class KubernetesAgonesGameServerAllocationResponse : KubernetesAgonesGame
 /// <summary>
 /// Agones GameServer Request/Response Base.
 /// </summary>
-public abstract class KubernetesAgonesGameServerAllocationBase
+public abstract class GameServerAllocationBase
 {
     public string apiVersion { get; set; } = "allocation.agones.dev/v1";
     public string kind { get; set; } = "GameServerAllocation";

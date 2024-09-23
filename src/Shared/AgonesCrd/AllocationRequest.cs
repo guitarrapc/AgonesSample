@@ -1,15 +1,13 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Shared;
+namespace Shared.AgonesCrd;
 
 // detail: https://agones.dev/site/docs/advanced/allocator-service/#api-reference
 // see: Swagger API definition. https://github.com/googleforgames/agones/blob/release-1.24.0/pkg/allocation/go/allocation.swagger.json
 
-public class AgonesAllocationApiRequest
+public class AllocationRequest
 {
-    public static AgonesAllocationApiRequest CreateRequest(string @namespace, string fleetName)
+    public static AllocationRequest CreateRequest(string @namespace, string fleetName)
     {
-        return new AgonesAllocationApiRequest
+        return new AllocationRequest
         {
             @namespace = @namespace,
             gameServerSelectors = new[]
@@ -78,7 +76,7 @@ public class AgonesAllocationApiRequest
     }
 }
 
-public class AgonesAllocationApiResponse
+public class AllocationResponse
 {
     public string? gameServerName { get; init; }
     public PortType[]? ports { get; init; }

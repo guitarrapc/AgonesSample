@@ -81,7 +81,7 @@ public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
             return new AgonesSdkServiceResponse
             {
                 IsSuccess = result.IsSuccess,
-                Message = "Obtain list of GameServers",
+                Message = "Obtain GameServer detail",
                 Detail = result.Detail,
             };
         }
