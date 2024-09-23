@@ -1,0 +1,10 @@
+@page "/call-service"
+@rendermode InteractiveServer
+
+<PageTitle>CallService</PageTitle>
+
+<h1>CallService</h1>
+
+<p><input type="text" @bind="Input" /><button class="btn btn-primary" @onclick="() => CallServiceAsync()">Submit</button> </p>
+<p>Address: @_address</p>
+<p>Result: @Result</p>

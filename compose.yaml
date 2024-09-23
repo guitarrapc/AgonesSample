@@ -1,17 +1,19 @@
 services:
   frontend:
     build:
-      dockerfile: ./src/SimpleFrontEnd/Dockerfile
+      dockerfile: ./src/FrontendPage/Dockerfile
       context: .
-    image: agonessample-simplefrontend:dev
+    image: guitarrapc/agonessample-frontendpage:dev
+    pull_policy: never
     ports:
-      - 5104:80
+      - 5104:8080
 
   server:
     build:
-      dockerfile: ./src/SimpleBackend/Dockerfile
+      dockerfile: ./src/BackendServer/Dockerfile
       context: .
-    image: agonessample-simplebackend:dev
+    image: guitarrapc/agonessample-backendserver:dev
+    pull_policy: never
     ports:
       - 5157:5157
     restart: on-failure:1 # emulate new pod when shutdown

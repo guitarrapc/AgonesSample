@@ -1,44 +1,47 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: simple-frontend
+  name: frontend
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: simple-frontend
+      app: frontend
   template:
     metadata:
       labels:
-        app: simple-frontend
+        app: frontend
       annotations:
-        kubectl.kubernetes.io/default-container: simple-frontend
+        kubectl.kubernetes.io/default-container: frontend
     spec:
       serviceAccountName: agones-rest
       containers:
-        - name: simple-frontend
-          image: guitarrapc/agonessample-simplefrontend:v2.0.4
-          imagePullPolicy: Always
+        - name: frontend
+          image: guitarrapc/agonessample-frontendpage:dev
+          imagePullPolicy: Never
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
           resources:
             limits:
               memory: "128Mi"
               cpu: "500m"
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
 ---
 apiVersion: "agones.dev/v1"
 kind: Fleet
 metadata:
-  name: simple-backend
+  name: backend
   namespace: default
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
-        app: simple-backend
+        app: backend
     spec:
       ports:
         - name: default
@@ -47,14 +50,17 @@ spec:
       template:
         metadata:
           labels:
-            app: simple-backend
+            app: backend
           annotations:
-            kubectl.kubernetes.io/default-container: simple-backend
+            kubectl.kubernetes.io/default-container: backend
         spec:
           containers:
-            - name: simple-backend
-              image: guitarrapc/agonessample-simplebackend:v2.0.4
-              imagePullPolicy: Always
+            - name: backend
+              image: guitarrapc/agonessample-backendserver:dev
+              imagePullPolicy: Never
+              env:
+                - name: ASPNETCORE_ENVIRONMENT
+                  value: "Development"
               resources:
                 requests:
                   memory: "128Mi"
@@ -62,22 +68,18 @@ spec:
                 limits:
                   memory: "128Mi"
                   cpu: "500m"
-              ports:
-                - name: api
-                  containerPort: 5012
-                  protocol: TCP
 ---
 apiVersion: "autoscaling.agones.dev/v1"
 kind: FleetAutoscaler
 metadata:
-  name: simple-backend-autoscaler
+  name: backend-autoscaler
   namespace: default
 spec:
-  fleetName: simple-backend
+  fleetName: backend
   policy:
     type: Buffer
     buffer:
-      bufferSize: 2
+      bufferSize: 1
       minReplicas: 0
       maxReplicas: 10
 ---
@@ -132,24 +134,24 @@ roleRef:
 apiVersion: v1
 kind: Service
 metadata:
-  name: simple-frontend
+  name: frontend
   namespace: default
 spec:
   selector:
-    app: simple-frontend
+    app: frontend
   type: LoadBalancer
   ports:
-    - port: 5104
+    - port: 8080
       targetPort: http
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: simple-backend
+  name: backend
   namespace: default
 spec:
   selector:
-    app: simple-backend
+    app: backend
   ports:
-    - port: 80
-      targetPort: 5012
+    - port: 5157
+      targetPort: 5157

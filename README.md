@@ -1,7 +1,7 @@
 # AgonesSample
 
-* [guitarrapc/agonessample-simplebackend](https://hub.docker.com/r/guitarrapc/agonessample-simplebackend) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleBackend/Dockerfile)
-* [guitarrapc/agonessample-simplefrontend](https://hub.docker.com/r/guitarrapc/agonessample-simplefrontend) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/SimpleFrontEnd/Dockerfile)
+* [guitarrapc/agonessample-BackendServer](https://hub.docker.com/r/guitarrapc/agonessample-BackendServer) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/BackendServer/Dockerfile)
+* [guitarrapc/agonessample-FrontEnd](https://hub.docker.com/r/guitarrapc/agonessample-FrontEnd) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/FrontEnd/Dockerfile)
 
 # Prerequisites
 
@@ -10,7 +10,7 @@ Install Agones. Options set Allocator non-TLS.
 ```shell
 helm repo add agones https://agones.dev/chart/stable
 helm repo update
-helm upgrade --install agones agones/agones --version 1.23.0 --namespace agones-system --create-namespace --set agones.allocator.service.http.port=8443 --set agones.allocator.service.grpc.enabled=false --set agones.allocator.disableTLS=true
+helm upgrade --install agones agones/agones --version 1.43.0 --namespace agones-system --create-namespace --set "gameservers.namespaces={default}" --set agones.allocator.service.http.port=8443 --set agones.allocator.service.grpc.enabled=false --set agones.allocator.disableTLS=true
 ```
 
 # Install
@@ -53,14 +53,15 @@ Run docker-compose to emulate AgonesSDK. Use [examples/docker/compose.yaml](http
 ```yaml
 services:
   frontend:
-    image: agonessample-simplefrontend:v2.0.0
+    image: agonessample-frontendpage:v3.0.0
     ports:
-      - 5104:80
+      - 5104:8080
 
   server:
-    image: agonessample-simplebackend:v2.0.0
+    image: agonessample-backendserver:v3.0.0
     ports:
-      - 5157:80
+      - 5157:5157
+    restart: on-failure:1 # emulate new pod when shutdown
 ```
 
 Then run docker-compose.

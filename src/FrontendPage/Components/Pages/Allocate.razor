@@ -1,0 +1,57 @@
+@page "/allocate"
+@rendermode InteractiveServer
+
+<PageTitle>Allocate</PageTitle>
+
+<h1>Allocate</h1>
+
+<div class="flex-column">
+    <div class="nav-item px-3">
+        <input type="text" @bind="Input" />
+        <div>
+            <p><span class="oi oi-text" aria-hidden="true"></span> Server (address:port)</p>
+        </div>
+    </div>
+    <div class="nav-item px-3">
+        <button class="btn btn-primary" @onclick="AllocationApiAsync">Allocator Api</button>        
+        <p>Use Agones Allocation API to allocate. Server Endpoint should be agones-allocator.agones-system.svc.cluster.local:8443 </p>
+    </div>
+    <div class="nav-item px-3">
+        <button class="btn btn-primary" @onclick="AllocationBackendAsync">Allocator Backend</button>
+        <p>Use Agones CRD to allocate through Kubernetes API. Server Endpoint should be GameServer you want allocate.</p>
+    </div>
+    <div class="nav-item px-3">
+        <button class="btn btn-primary" @onclick="AllocationCrdAsync">Allocator Crd</button>
+        <p>Use Agones CRD to allocate through Kubernetes API. Server Endpoint will ignore.</p>
+    </div>
+    <div class="nav-item px-3">
+        <button class="btn btn-primary" @onclick="ManualAllocateAsync">Add Allocate Entry</button>
+        <p>Not allocate. Just add server entry to database.</p>
+    </div>
+    <hr>
+    <div class="nav-item px-3">
+        <button class="btn btn-primary" @onclick="GetKubernetesApiAsync">Test Kubernetes Api</button>
+        <p>Run Kubernetes API.</p>
+    </div>
+    <hr>
+    <div class="nav-item px-3">
+        <p>Admin Ops</p>
+        <button class="btn btn-primary" @onclick="ClearAsync">Clear</button>
+        <button class="btn btn-primary" @onclick="ListAsync">List</button>
+    </div>
+</div>
+
+<hr>
+
+<p>Result: @Result</p>
+<ul>
+    @foreach (var item in List)
+    {
+        <li>@item</li>
+    }
+</ul>
+
+<hr>
+
+<pre>@Message</pre>
+<pre class="json">@Detail</pre>

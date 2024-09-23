@@ -1,0 +1,24 @@
+@page "/agones-control"
+@rendermode InteractiveServer
+
+<PageTitle>Agones Control</PageTitle>
+
+<h1>Agones Control</h1>
+
+<p>Server (address:port): <input type="text" @bind="Input" /></p>
+<p>
+    <button class="btn btn-primary" @onclick="() => AllocateAsync()">Allocate</button>
+    <button class="btn btn-primary" @onclick="() => ReadyAsync()">Ready</button>
+    <button class="btn btn-primary" @onclick="() => GetGameServerAsync()">GetGameServer</button>
+    <button class="btn btn-primary" @onclick="() => ShutdownAsync()">Shutdown</button>
+</p>
+<p>Address: @Input</p>
+
+<hr>
+
+<p>Result: @Result</p>
+
+<hr>
+
+<pre>@Message</pre>
+<pre class="json">@Detail</pre>

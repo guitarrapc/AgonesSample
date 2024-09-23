@@ -1,0 +1,44 @@
+@page "/gameservers"
+@rendermode InteractiveServer
+
+<PageTitle>GameServers</PageTitle>
+<h1>GameServers</h1>
+
+<p>GameServer API: <button class="btn btn-primary" @onclick="GetGameServersAsync">Submit</button> </p>
+<hr>
+<p>Result: @Message</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Namespace</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Endpoint</th>
+            <th>Address</th>
+            <th>Port</th>
+            <th>Node</th>
+            <th>Age</th>
+            <th>Shutdown</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in List)
+    {
+        <tr>
+            <td>@item.Namespace</td>
+            <td>@item.Name</td>
+            <td>@item.Status</td>
+            <td>@item.Endpoint</td>
+            <td>@item.Address</td>
+            <td>@item.Port</td>
+            <td>@item.Node</td>
+            <td>@item.Age</td>
+            <td><button class="btn btn-primary" @onclick="@(() => ShutdownAsync(item.Endpoint))">Shutdown</button></td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<hr>
+
+<pre class="json">@Detail</pre>

@@ -6,20 +6,16 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
-
-env:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-  DOTNET_NOLOGO: true
+  schedule:
+    - cron: 0 1 * * 1 # At AM10:00 JST on Monday
 
 jobs:
   dotnet:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.x
+      - uses: actions/checkout@v4
+      - uses: guitarrapc/actions/.github/actions/setup-dotnet@main
       - name: build
         run: dotnet build -c Release
       # - name: test
@@ -30,22 +26,24 @@ jobs:
   docker:
     strategy:
       matrix:
-        project: ["SimpleBackend", "SimpleFrontEnd"]
-        include:
-          - project: "SimpleBackend"
-            docker-image: guitarrapc/agonessample-simplebackend
-          - project: "SimpleFrontEnd"
-            docker-image: guitarrapc/agonessample-simplefrontend
+        project: ["BackendServer", "FrontendPage"]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - name: lower
+        id: image
+        run: echo "name=guitarrapc/agonessample-${PROJECT,,}" | tee -a "${GITHUB_OUTPUT}"
+        env:
+          PROJECT: ${{ matrix.project }}
       - name: docker build
-        run: docker build -t ${{ matrix.docker-image }}:latest -f src/${{ matrix.project }}/Dockerfile .
+        run: |
+          docker build -t "${{ steps.image.outputs.name }}:latest" -f "src/${{ matrix.project }}/Dockerfile" .
+          docker tag "${{ steps.image.outputs.name }}:latest" "${{ steps.image.outputs.name }}:${{ github.run_id }}"
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: "${{ matrix.docker-image }}:latest"
+          image-ref: ${{ steps.image.outputs.name }}:latest
           format: "table"
           exit-code: "1"
           ignore-unfixed: true
