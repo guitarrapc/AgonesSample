@@ -4,13 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "tag: git tag you want create. (sample v1.0.0)"
+        description: "tag: git tag you want create. (sample 1.0.0)"
         required: true
       dry-run:
         description: "dry-run: true will never create release/nuget."
         required: true
         default: false
         type: boolean
+
+permissions:
+  contents: write
 
 jobs:
   docker:
@@ -20,8 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Is tag valid?
-        run: if [[ "${{ inputs.tag }}" != "v"* ]]; then exit 1; fi
       - uses: actions/checkout@v4
       - name: lower
         id: image
@@ -32,14 +33,14 @@ jobs:
       - name: Docker Build
         run: |
           docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t "${{ steps.image.outputs.name }}:latest" -f "src/${{ matrix.project }}/Dockerfile" .
-          docker tag "${{ steps.image.outputs.name }}:latest" "${{ steps.image.outputs.name }}:${{ inputs.tag }}"
+          docker tag "${{ steps.image.outputs.name }}:latest" "${{ steps.image.outputs.name }}:v${{ inputs.tag }}"
       - run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
         env:
           DOCKER_USER: ${{ secrets.SYNCED_DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.SYNCED_DOCKER_PASS }}
       - run: docker push "${{ steps.image.outputs.name }}:latest"
         if: ${{ !inputs.dry-run }}
-      - run: docker push "${{ steps.image.outputs.name }}:${{ inputs.tag }}"
+      - run: docker push "${{ steps.image.outputs.name }}:v${{ inputs.tag }}"
         if: ${{ !inputs.dry-run }}
 
   git:
@@ -55,10 +56,13 @@ jobs:
         if: ${{ !inputs.dry-run }}
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.SYNCED_GITHUB_TOKEN_REPO }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
           tags: true
       # release
       - name: Create Release
         run: gh release create ${{ inputs.tag }} --draft --verify-tag --title "Ver.${{ inputs.tag }}" --generate-notes
         if: ${{ !inputs.dry-run }}
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
