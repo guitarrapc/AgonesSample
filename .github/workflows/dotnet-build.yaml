@@ -33,7 +33,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: lower
         id: image
-        run: echo "name=guitarrapc/agonessample-${${{matrix.project}},,}" | tee -a "${GITHUB_OUTPUT}"
+        run: echo "name=guitarrapc/agonessample-${PROJECT,,}" | tee -a "${GITHUB_OUTPUT}"
+        env:
+          PROJECT: ${{ matrix.project }}
       - name: docker build
         run: |
           docker build -t "${{ steps.image.outputs.name }}:latest" -f "src/${{ matrix.project }}/Dockerfile" .
