@@ -16,7 +16,7 @@ jobs:
   docker:
     strategy:
       matrix:
-        project: ["BackendServer", "FrontEnd"]
+        project: ["BackendServer", "FrontendPage"]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
