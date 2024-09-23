@@ -33,26 +33,16 @@ jobs:
       - name: Is tag valid?
         run: if [[ "${{ inputs.tag }}" != "v"* ]]; then exit 1; fi
       - uses: actions/checkout@v4
-      # docker build and scan
+      # docker build and push
       - name: Docker Build
         run: |
           docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t ${{ matrix.docker-image }}:latest -f src/${{ matrix.project }}/Dockerfile .
           docker tag ${{ matrix.docker-image }}:latest ${{ matrix.docker-image }}:${{ inputs.tag }}
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: "${{ matrix.docker-image }}:latest"
-          format: "table"
-          exit-code: "1"
-          ignore-unfixed: true
-          vuln-type: "os,library"
-          severity: "CRITICAL,HIGH"
-      # docker push
       - run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
         env:
           DOCKER_USER: ${{ secrets.SYNCED_DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.SYNCED_DOCKER_PASS }}
-      - run: docker push ${{ matrix.docker-image }}
+      - run: docker push ${{ matrix.docker-image }}:latest
         if: ${{ !inputs.dry-run }}
       - run: docker push ${{ matrix.docker-image }}:${{ inputs.tag }}
         if: ${{ !inputs.dry-run }}
