@@ -9,7 +9,8 @@ on:
       dry-run:
         description: "dry-run: true will never create release/nuget."
         required: true
-        default: "false"
+        default: false
+        type: boolean
 
 env:
   OWNER: guitarrapc
@@ -31,14 +32,14 @@ jobs:
     steps:
       - name: Is tag valid?
         run: if [[ "${{ inputs.tag }}" != "v"* ]]; then exit 1; fi
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # docker build and scan
       - name: Docker Build
         run: |
           docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t ${{ matrix.docker-image }}:latest -f src/${{ matrix.project }}/Dockerfile .
           docker tag ${{ matrix.docker-image }}:latest ${{ matrix.docker-image }}:${{ inputs.tag }}
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: "${{ matrix.docker-image }}:latest"
           format: "table"
@@ -52,34 +53,27 @@ jobs:
           DOCKER_USER: ${{ secrets.SYNCED_DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.SYNCED_DOCKER_PASS }}
       - run: docker push ${{ matrix.docker-image }}
-        if: ${{ inputs.dry-run  == 'false' }}
+        if: ${{ !inputs.dry-run }}
       - run: docker push ${{ matrix.docker-image }}:${{ inputs.tag }}
-        if: ${{ inputs.dry-run  == 'false' }}
+        if: ${{ !inputs.dry-run }}
 
   git:
     needs: [docker]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # tag
       - run: git tag ${{ inputs.tag }}
-        if: ${{ inputs.dry-run  == 'false' }}
+        if: ${{ !inputs.dry-run }}
       - name: Push changes
-        if: ${{ inputs.dry-run  == 'false' }}
+        if: ${{ !inputs.dry-run }}
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.SYNCED_GITHUB_TOKEN_REPO }}
           branch: ${{ github.ref }}
           tags: true
       # release
-      - uses: actions/create-release@v1
-        if: ${{ inputs.dry-run  == 'false' }}
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.SYNCED_GITHUB_TOKEN_REPO }}
-        with:
-          tag_name: ${{ inputs.tag }}
-          release_name: ${{ inputs.tag }}
-          draft: true
-          prerelease: false
+      - name: Create Release
+        run: gh release create ${{ inputs.tag }} --draft --verify-tag --title "Ver.${{ inputs.tag }}" --generate-notes
+        if: ${{ !inputs.dry-run }}

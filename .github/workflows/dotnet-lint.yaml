@@ -15,10 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.100
+      - uses: actions/checkout@v4
+      - uses: guitarrapc/actions/.github/actions/setup-dotnet@main
 
       # dotnet list
       - name: Obtain csproj to lint

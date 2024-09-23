@@ -6,6 +6,8 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  schedule:
+    - cron: 0 1 * * 1 # At AM10:00 JST on Monday
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -16,10 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.x
+      - uses: actions/checkout@v4
+      - uses: guitarrapc/actions/.github/actions/setup-dotnet@main
       - name: build
         run: dotnet build -c Release
       # - name: test
@@ -30,22 +30,17 @@ jobs:
   docker:
     strategy:
       matrix:
-        project: ["BackendServer", "FrontEnd"]
-        include:
-          - project: "BackendServer"
-            docker-image: guitarrapc/agonessample-BackendServer
-          - project: "FrontEnd"
-            docker-image: guitarrapc/agonessample-FrontEnd
+        project: ["BackendServer", "FrondendPage"]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: docker build
-        run: docker build -t ${{ matrix.docker-image }}:latest -f src/${{ matrix.project }}/Dockerfile .
+        run: docker build -t guitarrapc/agonessample-${{ matrix.project }}:latest -f src/${{ matrix.project }}/Dockerfile .
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: "${{ matrix.docker-image }}:latest"
+          image-ref: guitarrapc/agonessample-${{ matrix.project }}:latest
           format: "table"
           exit-code: "1"
           ignore-unfixed: true
