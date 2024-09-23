@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: simple-frontend
+  name: frontend
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: simple-frontend
+      app: frontend
   template:
     metadata:
       labels:
-        app: simple-frontend
+        app: frontend
       annotations:
-        kubectl.kubernetes.io/default-container: simple-frontend
+        kubectl.kubernetes.io/default-container: frontend
     spec:
       serviceAccountName: agones-rest
       containers:
-        - name: simple-frontend
-          image: guitarrapc/agonessample-FrontEnd:v2.0.4
+        - name: frontend
+          image: guitarrapc/agonessample-frontendpage:v2.0.4
           imagePullPolicy: Always
           resources:
             limits:
@@ -31,14 +31,14 @@ spec:
 apiVersion: "agones.dev/v1"
 kind: Fleet
 metadata:
-  name: simple-backend
+  name: backend
   namespace: default
 spec:
   replicas: 2
   template:
     metadata:
       labels:
-        app: simple-backend
+        app: backend
     spec:
       ports:
         - name: default
@@ -47,13 +47,13 @@ spec:
       template:
         metadata:
           labels:
-            app: simple-backend
+            app: backend
           annotations:
-            kubectl.kubernetes.io/default-container: simple-backend
+            kubectl.kubernetes.io/default-container: backend
         spec:
           containers:
-            - name: simple-backend
-              image: guitarrapc/agonessample-BackendServer:v2.0.4
+            - name: backend
+              image: guitarrapc/agonessample-backendserver:v2.0.4
               imagePullPolicy: Always
               resources:
                 requests:
@@ -70,10 +70,10 @@ spec:
 apiVersion: "autoscaling.agones.dev/v1"
 kind: FleetAutoscaler
 metadata:
-  name: simple-backend-autoscaler
+  name: backend-autoscaler
   namespace: default
 spec:
-  fleetName: simple-backend
+  fleetName: backend
   policy:
     type: Buffer
     buffer:
@@ -132,11 +132,11 @@ roleRef:
 apiVersion: v1
 kind: Service
 metadata:
-  name: simple-frontend
+  name: frontend
   namespace: default
 spec:
   selector:
-    app: simple-frontend
+    app: frontend
   type: LoadBalancer
   ports:
     - port: 5104
@@ -145,11 +145,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: simple-backend
+  name: backend
   namespace: default
 spec:
   selector:
-    app: simple-backend
+    app: backend
   ports:
     - port: 80
       targetPort: 5012

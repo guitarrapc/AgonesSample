@@ -4,7 +4,7 @@ kind: GameServerAllocation
 spec:
   selectors:
     - matchLabels:
-        agones.dev/fleet: simple-backend
+        agones.dev/fleet: backend
       gameServerState: Ready
   scheduling: Packed
 metadata:
