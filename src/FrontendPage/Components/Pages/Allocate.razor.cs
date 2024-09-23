@@ -15,7 +15,7 @@ public partial class Allocate : ComponentBase
     private string[] List { get; set; } = Array.Empty<string>();
     private string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
         ? DockerServiceProvider.Current.IsRunningOnDocker
-            ? "server:8080" // docker
+            ? "server:5157" // docker
             : "localhost:5157" // local machine
         : "agones-allocator.agones-system.svc.cluster.local:8443"; // kubernetes
     private const string Namespace = "default";

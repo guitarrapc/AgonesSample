@@ -14,8 +14,6 @@ public class Program
             ContentRootPath = Path.GetDirectoryName(typeof(Program).Assembly.Location),
         };
         var builder = WebApplication.CreateBuilder(option);
-        builder.Configuration.AddJsonFile($"appsettings.Grpc.json");
-        builder.Configuration.AddJsonFile($"appsettings.Grpc.{builder.Environment.EnvironmentName}.json", optional: true);
 
         // Add AgonesSDK
         builder.AddAgonesService().EnableHealthCheck();

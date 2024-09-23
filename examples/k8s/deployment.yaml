@@ -17,8 +17,11 @@ spec:
       serviceAccountName: agones-rest
       containers:
         - name: frontend
-          image: guitarrapc/agonessample-frontendpage:v3.0.0
-          imagePullPolicy: Always
+          image: guitarrapc/agonessample-frontendpage:dev
+          imagePullPolicy: Never
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
           resources:
             limits:
               memory: "128Mi"
@@ -34,7 +37,7 @@ metadata:
   name: backend
   namespace: default
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -42,7 +45,7 @@ spec:
     spec:
       ports:
         - name: default
-          containerPort: 8080
+          containerPort: 5157
           protocol: TCP
       template:
         metadata:
@@ -53,8 +56,11 @@ spec:
         spec:
           containers:
             - name: backend
-              image: guitarrapc/agonessample-backendserver:v3.0.0
-              imagePullPolicy: Always
+              image: guitarrapc/agonessample-backendserver:dev
+              imagePullPolicy: Never
+              env:
+                - name: ASPNETCORE_ENVIRONMENT
+                  value: "Development"
               resources:
                 requests:
                   memory: "128Mi"
@@ -73,7 +79,7 @@ spec:
   policy:
     type: Buffer
     buffer:
-      bufferSize: 2
+      bufferSize: 1
       minReplicas: 0
       maxReplicas: 10
 ---
@@ -147,5 +153,5 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 5157
+      targetPort: 5157

@@ -25,25 +25,25 @@ public partial class GameServers : ComponentBase
 
             Message = $"{gameservers?.items?.Length ?? 0} GameServers found.";
             Detail = "";
-            List = gameservers?.items is not null
-                ? gameservers!.items.Select(x => new GameServerViewModel
+            List = gameservers?.items?.Length is not null
+                ? gameservers.items.Select(x => new GameServerViewModel
                 {
-                    Address = x.status!.address,
-                    Port = x.status.ports![0].port,
+                    Address = x.status?.address,
+                    Port = x.status?.ports?[0]?.port ?? 0,
                     // 2021-12-09T06:35:40Z
-                    Age = ConvertToAge(DateTime.UtcNow - x.metadata!.creationTimestamp),
-                    Name = x.metadata.name,
-                    Namespace = x.metadata.@namespace,
-                    Node = x.status.nodeName,
-                    Status = x.status.state,
+                    Age = x.metadata is not null ? ConvertToAge(DateTime.UtcNow - x.metadata.creationTimestamp) : ConvertToAge(TimeSpan.Zero),
+                    Name = x.metadata?.name,
+                    Namespace = x.metadata?.@namespace,
+                    Node = x.status?.nodeName,
+                    Status = x.status?.state,
                 }).ToArray()
-                : Array.Empty<GameServerViewModel>();
+                : [];
         }
         catch (Exception ex)
         {
             Message = $"Could not retrieve GameServerList.";
             Detail = $"{ex.Message} {ex.StackTrace}";
-            List = Array.Empty<GameServerViewModel>();
+            List = [];
         }
 
         StateHasChanged();

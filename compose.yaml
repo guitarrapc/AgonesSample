@@ -3,7 +3,7 @@ services:
     build:
       dockerfile: ./src/FrontendPage/Dockerfile
       context: .
-    image: agonessample-frontendpage:dev
+    image: guitarrapc/agonessample-frontendpage:dev
     pull_policy: never
     ports:
       - 5104:8080
@@ -12,7 +12,7 @@ services:
     build:
       dockerfile: ./src/BackendServer/Dockerfile
       context: .
-    image: agonessample-backendserver:dev
+    image: guitarrapc/agonessample-backendserver:dev
     pull_policy: never
     ports:
       - 5157:5157

@@ -2,7 +2,7 @@ services:
   frontend:
     image: guitarrapc/agonessample-frontendpage:v3.0.0
     ports:
-      - 5104:80
+      - 5104:8080
 
   server:
     image: guitarrapc/agonessample-backendserver:v3.0.0
