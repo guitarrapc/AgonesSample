@@ -9,10 +9,6 @@ on:
   schedule:
     - cron: 0 1 * * 1 # At AM10:00 JST on Monday
 
-env:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-  DOTNET_NOLOGO: true
-
 jobs:
   dotnet:
     runs-on: ubuntu-latest
@@ -35,12 +31,17 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: lower
+        id: image
+        run: echo "name=guitarrapc/agonessample-${${{matrix.project}},,}" | tee -a "${GITHUB_OUTPUT}"
       - name: docker build
-        run: docker build -t guitarrapc/agonessample-${{ matrix.project }}:latest -f src/${{ matrix.project }}/Dockerfile .
+        run: |
+          docker build -t "${{ steps.image.outputs.name }}:latest" -f "src/${{ matrix.project }}/Dockerfile" .
+          docker tag "${{ steps.image.outputs.name }}:latest" "${{ steps.image.outputs.name }}:${{ github.run_id }}"
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: guitarrapc/agonessample-${{ matrix.project }}:latest
+          image-ref: ${{ steps.image.outputs.name }}:latest
           format: "table"
           exit-code: "1"
           ignore-unfixed: true
