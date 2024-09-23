@@ -1,11 +1,11 @@
 services:
   frontend:
-    image: guitarrapc/agonessample-frontendpage:v0.9.0
+    image: guitarrapc/agonessample-frontendpage:v3.0.0
     ports:
       - 5104:80
 
   server:
-    image: guitarrapc/agonessample-backendserver:v0.9.0
+    image: guitarrapc/agonessample-backendserver:v3.0.0
     ports:
       - 5157:5157
     restart: on-failure:1 # emulate new pod when shutdown

@@ -17,7 +17,7 @@ spec:
       serviceAccountName: agones-rest
       containers:
         - name: frontend
-          image: guitarrapc/agonessample-frontendpage:v2.0.4
+          image: guitarrapc/agonessample-frontendpage:v3.0.0
           imagePullPolicy: Always
           resources:
             limits:
@@ -53,7 +53,7 @@ spec:
         spec:
           containers:
             - name: backend
-              image: guitarrapc/agonessample-backendserver:v2.0.4
+              image: guitarrapc/agonessample-backendserver:v3.0.0
               imagePullPolicy: Always
               resources:
                 requests:

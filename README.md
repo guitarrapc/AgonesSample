@@ -53,14 +53,15 @@ Run docker-compose to emulate AgonesSDK. Use [examples/docker/compose.yaml](http
 ```yaml
 services:
   frontend:
-    image: agonessample-FrontEnd:v2.0.0
+    image: agonessample-frontendpage:v3.0.0
     ports:
-      - 5104:80
+      - 5104:8080
 
   server:
-    image: agonessample-BackendServer:v2.0.0
+    image: agonessample-backendserver:v3.0.0
     ports:
-      - 5157:80
+      - 5157:5157
+    restart: on-failure:1 # emulate new pod when shutdown
 ```
 
 Then run docker-compose.
