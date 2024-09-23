@@ -66,6 +66,18 @@ public class KubernetesApiClient(IHttpClientFactory httpClientFactory)
         }
         var result = await httpClient.SendAsync(request);
         result.EnsureSuccessStatusCode();
-        return await result.Content.ReadAsStringAsync();
+        var responseString = await result.Content.ReadAsStringAsync();
+        return PrettyJson(responseString);
+    }
+
+    private static string PrettyJson(string json)
+    {
+        var options = new JsonSerializerOptions()
+        {
+            WriteIndented = true
+        };
+
+        var jsonElement = JsonSerializer.Deserialize<JsonElement>(json);
+        return JsonSerializer.Serialize(jsonElement, options);
     }
 }

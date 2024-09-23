@@ -21,10 +21,12 @@ public partial class GameServers : ComponentBase
     {
         try
         {
-            var gameservers = await AgonesGameServerService.GetGameServersAsync("default");
+            var res = await AgonesGameServerService.GetGameServersAsync("default");
+            var gameservers = res.response;
+            var json = res.json;
 
             Message = $"{gameservers?.items?.Length ?? 0} GameServers found.";
-            Detail = "";
+            Detail = json;
             List = gameservers?.items?.Length is not null
                 ? gameservers.items.Select(x => new GameServerViewModel
                 {

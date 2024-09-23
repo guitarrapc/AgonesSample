@@ -8,7 +8,7 @@ namespace FrontendPage.Services;
 
 public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesServiceRpcClient agonesRpcService, KubernetesApiClient kubernetesApi)
 {
-    public async Task<GameServerListResponse?> GetGameServersAsync(string @namespace)
+    public async Task<(GameServerListResponse? response, string json)> GetGameServersAsync(string @namespace)
     {
         if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
         {
@@ -24,19 +24,19 @@ public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesS
     /// Send Get request to Kubernetes /api endpoint.
     /// </summary>
     /// <returns></returns>
-    private async Task<GameServerListResponse?> GetGameServersKubernetesAsync(string @namespace)
+    private async Task<(GameServerListResponse? response, string json)> GetGameServersKubernetesAsync(string @namespace)
     {
         // ref: https://agones.dev/site/docs/guides/access-api/
         var json = await kubernetesApi.SendKubernetesApiAsync($"/apis/agones.dev/v1/namespaces/{@namespace}/gameservers", HttpMethod.Get);
         var response = JsonSerializer.Deserialize<GameServerListResponse>(json);
-        return response;
+        return (response, json);
     }
 
     /// <summary>
     /// Send Allocation request to Agones.
     /// </summary>
     /// <returns></returns>
-    private async Task<GameServerListResponse?> GetGameServersAgonesAsync()
+    private async Task<(GameServerListResponse? response, string json)> GetGameServersAgonesAsync()
     {
         var servers = database.Items.Select(x => $"http://{x}").ToArray();
         var tasks = servers.Select(x => agonesRpcService.GetGameServerAsync(x));
@@ -51,10 +51,11 @@ public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesS
             .ToArray()
             ?? Array.Empty<GameServerResponse>();
 
-        return new GameServerListResponse
+        var response = new GameServerListResponse
         {
             items = items,
         };
+        var json = JsonSerializer.Serialize(response);
+        return (response, json);
     }
-
 }
