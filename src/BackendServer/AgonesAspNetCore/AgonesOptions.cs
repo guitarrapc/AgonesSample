@@ -1,4 +1,4 @@
-﻿namespace AgonesAspNetCore;
+namespace AgonesAspNetCore;
 
 public class AgonesOptions
 {

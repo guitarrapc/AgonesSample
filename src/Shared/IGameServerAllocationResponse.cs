@@ -1,4 +1,4 @@
-﻿namespace Shared;
+namespace Shared;
 
 /// <summary>
 /// Marker interface for GameServerAllocationResponse

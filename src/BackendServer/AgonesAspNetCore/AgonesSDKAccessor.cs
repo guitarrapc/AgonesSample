@@ -1,4 +1,4 @@
-﻿using Agones;
+using Agones;
 
 namespace AgonesAspNetCore;
 

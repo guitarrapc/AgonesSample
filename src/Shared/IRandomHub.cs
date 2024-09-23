@@ -1,4 +1,4 @@
-﻿using MagicOnion;
+using MagicOnion;
 using MessagePack;
 
 namespace Shared;

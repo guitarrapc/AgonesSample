@@ -1,4 +1,4 @@
-﻿using MagicOnion.Server.Hubs;
+using MagicOnion.Server.Hubs;
 using Shared;
 
 namespace BackendServerGrpc.Hubs;

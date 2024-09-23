@@ -1,5 +1,3 @@
-using Shared;
-
 namespace BackendServerGrpc.Infrastructures;
 
 public static class KestrelHelperExtensions
