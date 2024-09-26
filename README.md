@@ -1,7 +1,7 @@
 # AgonesSample
 
-* [guitarrapc/agonessample-BackendServer](https://hub.docker.com/r/guitarrapc/agonessample-BackendServer) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/BackendServer/Dockerfile)
-* [guitarrapc/agonessample-FrontEnd](https://hub.docker.com/r/guitarrapc/agonessample-FrontEnd) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/FrontEnd/Dockerfile)
+* [guitarrapc/agonessample-backendserver](https://https://hub.docker.com/r/guitarrapc/agonessample-backendserver) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/BackendServer/Dockerfile)
+* [guitarrapc/agonessample-frontendpage](https://hub.docker.com/r/guitarrapc/agonessample-frontendpage) | [Dockerfile](https://github.com/guitarrapc/AgonesSample/blob/main/src/FrontendPage/Dockerfile)
 
 # Prerequisites
 
