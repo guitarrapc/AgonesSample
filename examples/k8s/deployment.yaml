@@ -46,6 +46,7 @@ spec:
     spec:
       ports:
         - name: default
+          portPolicy: Dynamic
           containerPort: 5157
           protocol: TCP
       template:
