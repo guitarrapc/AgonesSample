@@ -26,24 +26,26 @@ jobs:
       - uses: actions/checkout@v4
       - name: lower
         id: image
-        run: echo "name=guitarrapc/agonessample-${PROJECT,,}" | tee -a "${GITHUB_OUTPUT}"
+        run: |
+          echo "latest=guitarrapc/agonessample:${PROJECT,,}-latest" | tee -a "${GITHUB_OUTPUT}"
+          echo "current=guitarrapc/agonessample:${PROJECT,,}-v${{ inputs.tag }}" | tee -a "${GITHUB_OUTPUT}"
         env:
           PROJECT: ${{ matrix.project }}
       # docker build and push
       - name: Docker Build
         run: |
-          docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t "${{ steps.image.outputs.name }}:latest" -f "src/${{ matrix.project }}/Dockerfile" .
-          docker tag "${{ steps.image.outputs.name }}:latest" "${{ steps.image.outputs.name }}:v${{ inputs.tag }}"
+          docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t "${{ steps.image.outputs.latest }}" -f "src/${{ matrix.project }}/Dockerfile" .
+          docker tag "${{ steps.image.outputs.latest }}" "${{ steps.image.outputs.current }}"
       - run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
         env:
           DOCKER_USER: ${{ secrets.SYNCED_DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.SYNCED_DOCKER_PASS }}
-      - run: docker push "${{ steps.image.outputs.name }}:latest"
+      - run: docker push "${{ steps.image.outputs.latest }}"
         if: ${{ !inputs.dry-run }}
-      - run: docker push "${{ steps.image.outputs.name }}:v${{ inputs.tag }}"
+      - run: docker push "${{ steps.image.outputs.current }}"
         if: ${{ !inputs.dry-run }}
 
-  git:
+  release:
     needs: [docker]
     runs-on: ubuntu-latest
     timeout-minutes: 10
