@@ -12,9 +12,9 @@ public partial class Allocate : ComponentBase
     private string? Result { get; set; }
     public string Message { get; set; } = "";
     public string Detail { get; set; } = "";
-    private string[] List { get; set; } = Array.Empty<string>();
+    private string[] List { get; set; } = [];
     private string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
-        ? DockerServiceProvider.Current.IsRunningOnDocker
+        ? KubernetesServiceProvider.Current.IsRunningOnDocker
             ? "server:5157" // docker
             : "localhost:5157" // local machine
         : "agones-allocator.agones-system.svc.cluster.local:8443"; // kubernetes

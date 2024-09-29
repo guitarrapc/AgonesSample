@@ -1,3 +1,4 @@
+using FrontendPage.Clients;
 using FrontendPage.Data;
 using FrontendPage.Infrastructures;
 using Shared;
@@ -6,9 +7,9 @@ using System.Text.Json;
 
 namespace FrontendPage.Services;
 
-public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesServiceRpcClient agonesRpcService, KubernetesApiClient kubernetesApi)
+public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesMagicOnionClient agonesRpcService, KubernetesApiClient kubernetesApi)
 {
-    public async Task<(GameServerListResponse? response, string json)> GetGameServersAsync(string @namespace)
+    public async Task<(GameServerListCrdResponse? response, string json)> GetGameServersAsync(string @namespace)
     {
         if (KubernetesServiceProvider.Current.IsRunningOnKubernetes)
         {
@@ -21,22 +22,22 @@ public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesS
     }
 
     /// <summary>
-    /// Send Get request to Kubernetes /api endpoint.
+    /// Send request to Kubernetes API endpoint.
     /// </summary>
     /// <returns></returns>
-    private async Task<(GameServerListResponse? response, string json)> GetGameServersKubernetesAsync(string @namespace)
+    private async Task<(GameServerListCrdResponse? response, string json)> GetGameServersKubernetesAsync(string @namespace)
     {
         // ref: https://agones.dev/site/docs/guides/access-api/
-        var json = await kubernetesApi.SendKubernetesApiAsync($"/apis/agones.dev/v1/namespaces/{@namespace}/gameservers", HttpMethod.Get);
-        var response = JsonSerializer.Deserialize<GameServerListResponse>(json);
+        var json = await kubernetesApi.GetGameServersAsync(@namespace);
+        var response = JsonSerializer.Deserialize<GameServerListCrdResponse>(json);
         return (response, json);
     }
 
     /// <summary>
-    /// Send Allocation request to Agones.
+    /// Send request to Agones GameServer API.
     /// </summary>
     /// <returns></returns>
-    private async Task<(GameServerListResponse? response, string json)> GetGameServersAgonesAsync()
+    private async Task<(GameServerListCrdResponse? response, string json)> GetGameServersAgonesAsync()
     {
         var servers = database.Items.Select(x => $"http://{x}").ToArray();
         var tasks = servers.Select(x => agonesRpcService.GetGameServerAsync(x));
@@ -49,9 +50,9 @@ public class AgonesGameServerService(IAgonesAllocationDatabase database, AgonesS
             .Where(x => x is not null)
             .Select(x => x!.ToAgonesCrdGameServerResponse(nodeName: "localhost"))
             .ToArray()
-            ?? Array.Empty<GameServerResponse>();
+            ?? [];
 
-        var response = new GameServerListResponse
+        var response = new GameServerListCrdResponse
         {
             items = items,
         };

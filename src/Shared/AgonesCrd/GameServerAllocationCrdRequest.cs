@@ -9,12 +9,12 @@ namespace Shared.AgonesCrd;
 /// <example>
 /// {"apiVersion":"allocation.agones.dev/v1","kind":"GameServerAllocation","spec":{"selectors":["matchLabels":{"agones.dev/fleet":"FLEETNAME"}]}}
 /// </example>
-public class GameServerAllocationRequest
+public class GameServerAllocationCrdRequest
     : GameServerAllocationBase
 {
-    public static GameServerAllocationRequest CreateRequest(string name, string fleetName)
+    public static GameServerAllocationCrdRequest CreateRequest(string name, string fleetName)
     {
-        var request = new GameServerAllocationRequest()
+        var request = new GameServerAllocationCrdRequest()
         {
             metadata = new Metadata
             {
@@ -45,7 +45,7 @@ public class GameServerAllocationRequest
 /// Agones GameServerAllocation Response fron Kubernetes.
 /// ref: https://agones.dev/site/docs/reference/gameserverallocation/
 /// </summary>
-public class GameServerAllocationResponse : GameServerAllocationBase, IGameServerAllocationResponse
+public class GameServerAllocationCrdResponse : GameServerAllocationBase, IGameServerAllocationResponse
 {
     public Status? status { get; set; }
     public class Status

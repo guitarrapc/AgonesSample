@@ -1,14 +1,15 @@
+using FrontendPage.Infrastructures;
 using MagicOnion.Client;
 using Shared;
 
-namespace FrontendPage.Infrastructures;
+namespace FrontendPage.Clients;
 
 public enum AgonesResponseTypes
 {
     Success,
     Failed,
 }
-public class AgonesSdkServiceResponse
+public record AgonesSdkServiceResponse
 {
     public AgonesResponseTypes Status => IsSuccess ? AgonesResponseTypes.Success : AgonesResponseTypes.Failed;
     public bool IsSuccess { get; set; }
@@ -16,16 +17,14 @@ public class AgonesSdkServiceResponse
     public string Detail { get; set; } = default!;
 }
 
-public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
+public class AgonesMagicOnionClient()
 {
-    public async Task<AgonesSdkServiceResponse> AllocateCrdAsync(string address)
+    public async Task<AgonesSdkServiceResponse> AllocateAsync(string address)
     {
         try
         {
-            logger.LogInformation($"Sending {nameof(AllocateCrdAsync)} to {address}.");
-            var channel = GrpcChannelPool.Instance.CreateChannel(address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.AllocateAsync();
+            var client = CreateClient(address);
+            var result = await client.AllocateAsync();
             return new AgonesSdkServiceResponse
             {
                 IsSuccess = result.IsSuccess,
@@ -38,7 +37,7 @@ public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
             return new AgonesSdkServiceResponse
             {
                 IsSuccess = false,
-                Message = $"Failed to run {nameof(AllocateCrdAsync)}. {ex.Message}",
+                Message = $"Allocate request failed. {ex.Message}",
                 Detail = ex.StackTrace ?? "",
             };
         }
@@ -48,10 +47,8 @@ public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
     {
         try
         {
-            logger.LogInformation($"Sending {nameof(ReadyAsync)} to {address}.");
-            var channel = GrpcChannelPool.Instance.CreateChannel(address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.ReadyAsync();
+            var client = CreateClient(address);
+            var result = await client.ReadyAsync();
             return new AgonesSdkServiceResponse
             {
                 IsSuccess = result.IsSuccess,
@@ -64,7 +61,7 @@ public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
             return new AgonesSdkServiceResponse
             {
                 IsSuccess = false,
-                Message = $"Failed to run {nameof(ReadyAsync)}. {ex.Message}",
+                Message = $"Ready request failed. {ex.Message}",
                 Detail = ex.StackTrace ?? "",
             };
         }
@@ -74,14 +71,12 @@ public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
     {
         try
         {
-            logger.LogInformation($"Sending {nameof(GetGameServerAsync)} to {address}.");
-            var channel = GrpcChannelPool.Instance.CreateChannel(address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.GetGameServerAsync();
+            var client = CreateClient(address);
+            var result = await client.GetGameServerAsync();
             return new AgonesSdkServiceResponse
             {
                 IsSuccess = result.IsSuccess,
-                Message = "Obtain GameServer detail",
+                Message = "GetGameServer detail",
                 Detail = result.Detail,
             };
         }
@@ -90,7 +85,7 @@ public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
             return new AgonesSdkServiceResponse
             {
                 IsSuccess = false,
-                Message = $"Failed to run {nameof(GetGameServerAsync)}. {ex.Message}",
+                Message = $"GetGameServer request failed. {ex.Message}",
                 Detail = ex.StackTrace ?? "",
             };
         }
@@ -100,10 +95,8 @@ public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
     {
         try
         {
-            logger.LogInformation($"Sending {nameof(ShutdownAsync)} to {address}.");
-            var channel = GrpcChannelPool.Instance.CreateChannel(address);
-            var service = MagicOnionClient.Create<IAgonesService>(channel);
-            var result = await service.ShutdownAsync();
+            var client = CreateClient(address);
+            var result = await client.ShutdownAsync();
 
             return new AgonesSdkServiceResponse
             {
@@ -118,9 +111,16 @@ public class AgonesServiceRpcClient(ILogger<AgonesServiceRpcClient> logger)
             return new AgonesSdkServiceResponse
             {
                 IsSuccess = false,
-                Message = $"Failed to run {nameof(ShutdownAsync)}. {ex.Message}",
+                Message = $"Shutdown request failed. {ex.Message}",
                 Detail = ex.StackTrace ?? "",
             };
         }
+    }
+
+    private static IAgonesService CreateClient(string address)
+    {
+        var channel = GrpcChannelPool.Instance.CreateChannel(address);
+        var service = MagicOnionClient.Create<IAgonesService>(channel);
+        return service;
     }
 }

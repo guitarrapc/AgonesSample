@@ -56,11 +56,11 @@ public class AgonesSdkGameServerMock
         public int port_ { get; set; }
     }
 
-    public GameServerResponse ToAgonesCrdGameServerResponse(string nodeName = "")
+    public GameServerCrdResponse ToAgonesCrdGameServerResponse(string nodeName = "")
     {
-        return new GameServerResponse
+        return new GameServerCrdResponse
         {
-            metadata = new GameServerResponse.Metadata
+            metadata = new GameServerCrdResponse.Metadata
             {
                 name = objectMeta?.name,
                 @namespace = objectMeta?.@namespace,
@@ -68,19 +68,19 @@ public class AgonesSdkGameServerMock
                 labels = objectMeta?.labels,
                 creationTimestamp = new FileInfo(Assembly.GetEntryAssembly()!.Location).LastWriteTimeUtc, // It's mock. Let's use Assembly write time.
             },
-            spec = new GameServerResponse.Spec
+            spec = new GameServerCrdResponse.Spec
             {
-                health = new GameServerResponse.Health
+                health = new GameServerCrdResponse.Health
                 {
                     failureThreshold = spec?.health?.failureThreshold ?? 0,
                     initialDelaySeconds = spec?.health?.initialDelaySeconds ?? 0,
                     periodSeconds = spec?.health?.periodSeconds ?? 0,
                 },
             },
-            status = new GameServerResponse.Status
+            status = new GameServerCrdResponse.Status
             {
                 address = status?.address,
-                ports = status?.ports?.Select(x => new GameServerResponse.Port
+                ports = status?.ports?.Select(x => new GameServerCrdResponse.Port
                 {
                     name = x.name,
                     port = x.port_,

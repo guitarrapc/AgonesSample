@@ -1,5 +1,9 @@
+using FrontendPage.Clients;
 using FrontendPage.Infrastructures;
 using FrontendPage.Services;
+using Microsoft.Net.Http.Headers;
+using Shared;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,19 +35,27 @@ public static class StartupExtentions
     public static void RegisterApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<IAgonesAllocationDatabase, InmemoryAgonesAllocationDatabase>();
-        builder.Services.AddSingleton<AgonesAllocatorApiClient>();
-        builder.Services.AddSingleton<AgonesServiceRpcClient>();
-        builder.Services.AddSingleton<KubernetesApiClient>();
+        builder.Services.AddSingleton<AgonesMagicOnionClient>();
         builder.Services.AddSingleton<AgonesAllocationService>();
         builder.Services.AddSingleton<AgonesGameServerService>();
 
-        builder.Services.AddHttpClient("kubernetes-api")
+        builder.Services.AddSingleton<KubernetesApiClient>();
+        builder.Services.AddHttpClient("kubernetes-api", httpClient =>
+        {
+            httpClient.BaseAddress = new Uri(KubernetesServiceProvider.Current.KubernetesServiceEndPoint);
+            httpClient.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", KubernetesServiceProvider.Current.AccessToken);
+        })
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
             {
                 ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
             });
 
-        builder.Services.AddHttpClient("agonesallocator-api")
+        builder.Services.AddSingleton<AgonesApiClient>();
+        builder.Services.AddHttpClient("agnoes-api", httpClient =>
+        {
+            httpClient.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+        })
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
             {
                 ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,

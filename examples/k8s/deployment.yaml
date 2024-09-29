@@ -17,7 +17,8 @@ spec:
       serviceAccountName: agones-rest
       containers:
         - name: frontend
-          image: guitarrapc/agonessample-frontendpage:dev
+          #image: guitarrapc/agonessample:frontendpage-dev
+          image: guitarrapc/agonessample:frontendpage-v3.0.2
           imagePullPolicy: Never
           env:
             - name: ASPNETCORE_ENVIRONMENT
@@ -45,6 +46,7 @@ spec:
     spec:
       ports:
         - name: default
+          portPolicy: Dynamic
           containerPort: 5157
           protocol: TCP
       template:
@@ -56,7 +58,8 @@ spec:
         spec:
           containers:
             - name: backend
-              image: guitarrapc/agonessample-backendserver:dev
+              # image: guitarrapc/agonessample:backendserver-dev
+              image: guitarrapc/agonessample:backendserver-v3.0.2
               imagePullPolicy: Never
               env:
                 - name: ASPNETCORE_ENVIRONMENT

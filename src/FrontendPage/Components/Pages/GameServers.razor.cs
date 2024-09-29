@@ -1,4 +1,5 @@
-using FrontendPage.Infrastructures;
+using FrontendPage.Clients;
+using FrontendPage.Data;
 using FrontendPage.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -7,7 +8,7 @@ namespace FrontendPage.Components.Pages;
 public partial class GameServers : ComponentBase
 {
     [Inject]
-    public AgonesServiceRpcClient AgonesServerService { get; set; } = default!;
+    public AgonesMagicOnionClient AgonesServerService { get; set; } = default!;
     [Inject]
     public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
     [Inject]
@@ -23,7 +24,7 @@ public partial class GameServers : ComponentBase
         {
             var res = await AgonesGameServerService.GetGameServersAsync("default");
             var gameservers = res.response;
-            var json = res.json;
+            var json = JsonHelper.PrettyPrint(res.json);
 
             Message = $"{gameservers?.items?.Length ?? 0} GameServers found.";
             Detail = json;
