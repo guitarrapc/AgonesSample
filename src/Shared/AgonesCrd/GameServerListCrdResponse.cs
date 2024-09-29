@@ -4,10 +4,10 @@ namespace Shared.AgonesCrd;
 /// Agones GameServers List Response from Kubernetes.
 /// ref: https://agones.dev/site/docs/reference/gameserver/
 /// </summary>
-public class GameServerListResponse
+public class GameServerListCrdResponse
 {
     public string apiVersion { get; set; } = "agones.dev/v1";
-    public GameServerResponse[]? items { get; set; }
+    public GameServerCrdResponse[]? items { get; set; }
     public string kind { get; set; } = "GameServerList";
     public Metadata? metadata { get; set; }
 

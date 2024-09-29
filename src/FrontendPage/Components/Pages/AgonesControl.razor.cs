@@ -1,4 +1,4 @@
-using FrontendPage.Infrastructures;
+using FrontendPage.Clients;
 using FrontendPage.Services;
 using Microsoft.AspNetCore.Components;
 using Shared;
@@ -8,7 +8,7 @@ namespace FrontendPage.Components.Pages;
 public partial class AgonesControl : ComponentBase
 {
     [Inject]
-    public AgonesServiceRpcClient AgonesServerService { get; set; } = default!;
+    public AgonesMagicOnionClient AgonesServerService { get; set; } = default!;
     [Inject]
     public AgonesAllocationService AgonesAllocationService { get; set; } = default!;
 
@@ -16,14 +16,14 @@ public partial class AgonesControl : ComponentBase
     public string Message { get; set; } = "";
     public string Detail { get; set; } = "";
     public string Input { get; set; } = !KubernetesServiceProvider.Current.IsRunningOnKubernetes
-        ? DockerServiceProvider.Current.IsRunningOnDocker
+        ? KubernetesServiceProvider.Current.IsRunningOnDocker
             ? "server:5157" // docker
             : "localhost:5157" // local machine
         : ""; // kubernetes
 
     private async Task AllocateAsync()
     {
-        var result = await AgonesServerService.AllocateCrdAsync("http://" + Input.Trim());
+        var result = await AgonesServerService.AllocateAsync("http://" + Input.Trim());
         Result = result.Status.ToString();
         Message = result.Message;
         Detail = result.Detail;

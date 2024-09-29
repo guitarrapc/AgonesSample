@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace FrontendPage.Infrastructures;
 
-public class GrpcChannelPool
+public class GrpcChannelPool : IDisposable
 {
     private readonly ConcurrentDictionary<string, GrpcChannel> _channels = new();
 
@@ -14,8 +14,6 @@ public class GrpcChannelPool
         var channel = _channels.GetValueOrDefault(host, GrpcChannel.ForAddress(host));
         switch (channel.State)
         {
-            case Grpc.Core.ConnectivityState.Ready:
-                return channel;
             case Grpc.Core.ConnectivityState.TransientFailure:
                 _channels.TryRemove(host, out _);
                 channel.Dispose();
@@ -27,5 +25,13 @@ public class GrpcChannelPool
             default:
                 return channel;
         };
+    }
+
+    public void Dispose()
+    {
+        foreach (var channel in _channels.Values)
+        {
+            channel.Dispose();
+        }
     }
 }
