@@ -43,7 +43,7 @@ jobs:
           docker build -t "${{ steps.image.outputs.latest }}" -f "src/${{ matrix.project }}/Dockerfile" .
           docker tag "${{ steps.image.outputs.latest }}" "${{ steps.image.outputs.current }}"
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.27.0
         with:
           image-ref: ${{ steps.image.outputs.latest }}
           format: "table"
