@@ -6,8 +6,6 @@ on:
     - cron: 0 1 * * 1 # At AM10:00 JST on Monday
 
 env:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-  DOTNET_NOLOGO: true
   SLN_ROOT: .
 
 jobs:
