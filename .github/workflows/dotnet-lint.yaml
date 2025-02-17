@@ -14,7 +14,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      # temporary workaround for 9.0.200 https://github.com/dotnet/sdk/issues/46780
       - uses: guitarrapc/actions/.github/actions/setup-dotnet@main
+        with:
+          dotnet-version: '9.0.103'
 
       # dotnet list
       - name: Obtain csproj to lint

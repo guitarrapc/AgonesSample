@@ -1,6 +1,6 @@
 using Agones;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using BackendServerGrpc.AgonesAspNetCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Shared;
 
 namespace AgonesAspNetCore;
