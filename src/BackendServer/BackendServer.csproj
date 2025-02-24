@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AgonesSDK" Version="1.46.0" />
+    <PackageReference Include="AgonesSDK" Version="1.47.0" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Grpc.Core" Version="2.46.6" />
     <PackageReference Include="MagicOnion.Server" Version="6.1.6" />
