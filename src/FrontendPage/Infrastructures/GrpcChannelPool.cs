@@ -24,7 +24,8 @@ public class GrpcChannelPool : IDisposable
                 return CreateChannel(host);
             default:
                 return channel;
-        };
+        }
+        ;
     }
 
     public void Dispose()
