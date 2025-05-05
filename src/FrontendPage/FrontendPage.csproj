@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" Version="2.71.0" />
-    <PackageReference Include="MagicOnion.Client" Version="7.0.2" />
+    <PackageReference Include="MagicOnion.Client" Version="7.0.4" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
