@@ -17,7 +17,7 @@
     <PackageReference Include="AgonesSDK" Version="1.49.0" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
     <PackageReference Include="Grpc.Core" Version="2.46.6" />
-    <PackageReference Include="MagicOnion.Server" Version="6.1.6" />
+    <PackageReference Include="MagicOnion.Server" Version="7.0.4" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
