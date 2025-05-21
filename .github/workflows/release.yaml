@@ -12,14 +12,13 @@ on:
         default: false
         type: boolean
 
-permissions:
-  contents: write
-
 jobs:
   docker:
     strategy:
       matrix:
         project: ["BackendServer", "FrontendPage"]
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -34,7 +33,7 @@ jobs:
       # docker build and push
       - name: Docker Build
         run: |
-          docker build --build-arg VCS_REF=$(git rev-parse --short HEAD) -t "${{ steps.image.outputs.latest }}" -f "src/${{ matrix.project }}/Dockerfile" .
+          docker build --build-arg VCS_REF="$(git rev-parse --short HEAD)" -t "${{ steps.image.outputs.latest }}" -f "src/${{ matrix.project }}/Dockerfile" .
           docker tag "${{ steps.image.outputs.latest }}" "${{ steps.image.outputs.current }}"
       - run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
         env:
@@ -47,6 +46,8 @@ jobs:
 
   release:
     needs: [docker]
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

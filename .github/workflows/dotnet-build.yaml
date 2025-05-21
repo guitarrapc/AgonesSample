@@ -11,6 +11,8 @@ on:
 
 jobs:
   dotnet:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -27,6 +29,8 @@ jobs:
     strategy:
       matrix:
         project: ["BackendServer", "FrontendPage"]
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
