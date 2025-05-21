@@ -37,7 +37,8 @@ jobs:
         run: |
           docker build --build-arg VCS_REF="$(git rev-parse --short HEAD)" -t "${{ steps.image.outputs.latest }}" -f "src/${{ matrix.project }}/Dockerfile" .
           docker tag "${{ steps.image.outputs.latest }}" "${{ steps.image.outputs.current }}"
-      - run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+      - name: Docker Login
+        run: docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
         env:
           DOCKER_USER: ${{ secrets.SYNCED_DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.SYNCED_DOCKER_PASS }}
