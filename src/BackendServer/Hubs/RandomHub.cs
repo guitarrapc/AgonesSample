@@ -9,7 +9,7 @@ public class RandomHub : StreamingHubBase<IRandomHub, IRandomHubReciever>, IRand
     private readonly CancellationTokenSource _cts = new CancellationTokenSource();
     private readonly ILogger<RandomHub> _logger;
 
-    private IGroup? _group;
+    private IGroup<IRandomHubReciever>? _group;
     private Task? _taskLoop;
 
     public RandomHub(ILogger<RandomHub> logger)
@@ -21,14 +21,15 @@ public class RandomHub : StreamingHubBase<IRandomHub, IRandomHubReciever>, IRand
     {
         _logger.LogInformation($"StartAsync: {_id}; {Context.ContextId}");
         _group = await Group.AddAsync(_id);
+        var ct = _cts.Token;
         _taskLoop = Task.Run(async () =>
         {
-            while (!_cts.IsCancellationRequested)
+            while (!ct.IsCancellationRequested)
             {
                 await Task.Delay(1 * 1000);
-                Broadcast(_group).OnMessageRecieved($"{Environment.MachineName}|{_id}|{DateTime.Now}");
+                _group.All.OnMessageRecieved($"{Environment.MachineName}|{_id}|{DateTime.Now}");
             }
-        });
+        }, ct);
 
         return new StartResult(Environment.MachineName, _id);
     }
