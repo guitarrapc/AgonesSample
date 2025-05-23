@@ -5,23 +5,26 @@ namespace Shared;
 
 public interface IRandomHub : IStreamingHub<IRandomHub, IRandomHubReciever>
 {
+    Task JoinAsync(JoinRequest request);
     Task<StartResult> StartAsync();
 }
 
 public interface IRandomHubReciever
 {
+    void OnJoin(string userName);
     void OnMessageRecieved(string message);
 }
 
 [MessagePackObject(true)]
-public class StartResult
+public record StartResult
 {
-    public string Host { get; }
-    public string Id { get; }
+    public required string Host { get; init; }
+    public required Guid Id { get; init; }
+}
 
-    public StartResult(string host, string id)
-    {
-        Host = host;
-        Id = id;
-    }
+[MessagePackObject(true)]
+public record JoinRequest
+{
+    public required string RoomName { get; set; }
+    public required string UserName { get; set; }
 }

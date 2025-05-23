@@ -19,7 +19,7 @@ public partial class Connect : ComponentBase, IRandomHubReciever, IAsyncDisposab
     private bool _connected;
     private string? _address;
     private string? _host;
-    private string? _id;
+    private Guid? _id;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -31,6 +31,11 @@ public partial class Connect : ComponentBase, IRandomHubReciever, IAsyncDisposab
 
         _channel = GrpcChannelPool.Instance.CreateChannel(address);
         _hubClient = await StreamingHubClient.ConnectAsync<IRandomHub, IRandomHubReciever>(_channel, this);
+        await _hubClient.JoinAsync(new JoinRequest
+        {
+            RoomName = "Agones",
+            UserName = Environment.MachineName,
+        });
         var result = await _hubClient.StartAsync();
         _address = address;
         _host = result.Host;
@@ -45,6 +50,13 @@ public partial class Connect : ComponentBase, IRandomHubReciever, IAsyncDisposab
         {
             await _hubClient.DisposeAsync();
         }
+    }
+
+
+    public void OnJoin(string userName)
+    {
+        _log = _log.Insert(0, userName);
+        InvokeAsync(() => StateHasChanged());
     }
 
     public void OnMessageRecieved(string message)
