@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MagicOnion.Abstractions" Version="7.0.4" />
+    <PackageReference Include="MagicOnion.Abstractions" Version="7.0.5" />
   </ItemGroup>
 
 </Project>
