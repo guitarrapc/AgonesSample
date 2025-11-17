@@ -3,6 +3,7 @@ using MagicOnion.Server;
 using Shared;
 
 namespace BackendServerGrpc.Services;
+
 public class EchoService : ServiceBase<IEchoService>, IEchoService
 {
     public UnaryResult<string> EchoAsync(string message)
