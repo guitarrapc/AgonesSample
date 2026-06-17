@@ -29,9 +29,10 @@ jobs:
         id: image
         run: |
           echo "latest=guitarrapc/agonessample:${PROJECT,,}-latest" | tee -a "${GITHUB_OUTPUT}"
-          echo "current=guitarrapc/agonessample:${PROJECT,,}-v${{ inputs.tag }}" | tee -a "${GITHUB_OUTPUT}"
+          echo "current=guitarrapc/agonessample:${PROJECT,,}-v${TAG}" | tee -a "${GITHUB_OUTPUT}"
         env:
           PROJECT: ${{ matrix.project }}
+          TAG: ${{ inputs.tag }}
       # docker build and push
       - name: Docker Build
         run: |
@@ -59,7 +60,9 @@ jobs:
           persist-credentials: false
       # tag
       - name: Git Tag
-        run: git tag ${{ inputs.tag }}
+        run: git tag ${TAG}
+        env:
+          TAG: ${{ inputs.tag }}
         if: ${{ !inputs.dry-run }}
       - name: Push tag
         id: commit-and-push
@@ -67,11 +70,14 @@ jobs:
           git remote set-url origin "https://github-actions:${GITHUB_TOKEN}@github.com/${{ github.repository }}"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git push ${{ inputs.tag }}
+          git push ${TAG}
+        env:
+          TAG: ${{ inputs.tag }}
       # release
       - name: Create Release
-        run: gh release create ${{ inputs.tag }} --draft --verify-tag --title "Ver.${{ inputs.tag }}" --generate-notes
+        run: gh release create ${TAG} --draft --verify-tag --title "Ver.${TAG}" --generate-notes
         if: ${{ !inputs.dry-run }}
         env:
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
