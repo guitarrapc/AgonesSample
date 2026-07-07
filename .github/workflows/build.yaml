@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: guitarrapc/actions/.github/actions/setup-dotnet@main
+      - uses: guitarrapc/actions/.github/actions/setup-dotnet@9122a18b0dea07585a242b9eb6ed7886f8587c49 # v1.0.1
       - name: build
         run: dotnet build -c Release
       # - name: test
@@ -50,3 +50,12 @@ jobs:
         run: |
           docker build -t "${{ steps.image.outputs.latest }}" -f "src/${{ matrix.project }}/Dockerfile" .
           docker tag "${{ steps.image.outputs.latest }}" "${{ steps.image.outputs.current }}"
+
+  build-complete:
+    needs: [dotnet, docker]
+    permissions: {}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Build complete
+        run: echo "Build complete"
